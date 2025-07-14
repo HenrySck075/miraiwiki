@@ -17,15 +17,5 @@ export default defineNuxtConfig({
       },
     }
   },
-  /*
-  routeRules: {
-    "/**": {
-      cache: {
-        maxAge: 60*60,
-        swr: true
-      }
-    }
-  },
-  */
   css: ["~/assets/css/main.css"]
 })

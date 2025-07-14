@@ -107,7 +107,7 @@ export default defineEventHandler(async (e) => {
                 const rule = v as cssParser.Rule;
                 rule.selectors = rule.selectors!.map((s)=>s.replace(".fandom-community-header__background", ".fandomdesktop-background"));
                 // Remove height, margin-bottom, position, transform from the rule
-                rule.declarations = rule.declarations!.filter((v)=>v.type === "declaration" && !["height", "margin-bottom", "position", "transform"].includes(v.property!));
+                rule.declarations = rule.declarations!.filter((v)=>v.type === "declaration" && !["height", "margin-bottom", "position", "transform", "display"].includes(v.property!));
             })
             
 

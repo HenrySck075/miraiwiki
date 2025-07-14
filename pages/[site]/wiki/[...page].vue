@@ -32,12 +32,28 @@
                 <div id="page-header" class="page-header" v-once>
                   <div class="page-header__categories">
                     <span class="page-header__categories-in">in: </span>
-                    <template v-for="(cat, idx) in tuah.parse.categories">
+                    <template v-for="(cat, idx) in tuah.parse.categories.slice(0, 6)">
                       <a 
                       :href="`/${route.params.site}/wiki/Category:${cat.category}`"
                       :title="`Category:${cat.category.replaceAll('_', ' ')}`"
                       >{{ cat.category.replaceAll("_", " ") }}</a>
                       <span v-if="idx < tuah.parse.categories.length - 1">, </span>
+                    </template>
+                    <template v-if="tuah.parse.categories.length > 6">
+                       and 
+                      <UPopover mode="hover">
+                        <a href="#">{{ tuah.parse.categories.length-6 }} more</a>
+                        <template #content>
+                          <div class="flex flex-col flex-1/2 overflow-y-scroll h-96 p-4">
+                            <template v-for="cat in tuah.parse.categories.slice(6)">
+                              <ULink 
+                              :href="`/${route.params.site}/wiki/Category:${cat.category}`"
+                              :title="`Category:${cat.category.replaceAll('_', ' ')}`"
+                              >{{ cat.category.replaceAll("_", " ") }}</ULink>
+                            </template>
+                          </div>
+                        </template>
+                      </UPopover>
                     </template>
                   </div>
                   <div class="page-header__bottom">
@@ -117,7 +133,7 @@
           elem.attribs["src"] = src.replace("https://", '/api/assets/');
         }
       } else if (elem.tagName == "a") {
-        if (elem.attribs["href"]!.startsWith("/wiki/")) {
+        if (elem.attribs["href"]?.startsWith("/wiki/")) {
           /// TODO: more endpoints
           elem.attribs["href"] = elem.attribs["href"]!.replaceAll("/wiki", `/${route.params.site}/wiki`)
         } else {
@@ -180,6 +196,17 @@
       });
     }))
 
+    // bind onclick to all anchor elements (that is obviously clickable) to call navigateTo
+    content.value?.querySelectorAll("a").forEach((elem)=>{
+      if (elem.href && !elem.href.startsWith("#")) {
+        elem.addEventListener("click", (e)=>{
+          e.preventDefault();
+          e.stopImmediatePropagation(); // extra ensurance
+          navigateTo(elem.href.replace(location.origin, ""));
+        });
+      }
+    });
+
     // remove every elements in title that is not span.mw-page-title-main
     if (title.value) {
       title.value.querySelectorAll("*").forEach((elem)=>{
@@ -215,5 +242,7 @@
 .fandomdesktop-background {
   background-repeat: no-repeat;
   background-size: cover;
+  background-attachment: fixed;
+  background-position: center top;
 }
 </style>
