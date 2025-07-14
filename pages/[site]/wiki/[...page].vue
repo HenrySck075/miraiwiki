@@ -118,6 +118,7 @@
   function updateTree(e: cheerio.Cheerio<SElement>) {
     e.removeAttr("srcset")
     e.removeClass("lazyload")
+    if (e.is("img")) e.attr("loading", "lazy"); /*e.addClass("fancybreeze-disabledImages");*/
     for (const elem of e) {
       if (elem.tagName == "img") {
         // replace the src prefix from https:// to /wikiassets/
@@ -201,7 +202,6 @@
       if (elem.href && !elem.href.startsWith("#")) {
         elem.addEventListener("click", (e)=>{
           e.preventDefault();
-          e.stopImmediatePropagation(); // extra ensurance
           navigateTo(elem.href.replace(location.origin, ""));
         });
       }
@@ -244,5 +244,8 @@
   background-size: cover;
   background-attachment: fixed;
   background-position: center top;
+}
+.fancybreeze-disabledImages {
+  display: none;
 }
 </style>
