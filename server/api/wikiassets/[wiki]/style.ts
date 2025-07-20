@@ -88,16 +88,15 @@ export default defineEventHandler(async (e) => {
             e.node.res.statusCode = 404;
             e.node.res.end("what (allowed types are 'main' and 'wikiTheme')");
         }
-
-        for (const domain of assetsDomains) {
-            css = css.replaceAll(domain, `/api/assets/${domain.substring(8)}`)
-        }
-        css = css
-            .replaceAll("/wiki/Special:FilePath", `/api/wikiassets/${wiki}/filepath`)
-
+            
         const cssTree = cssParser.parse(css);
         const rules = cssTree.stylesheet!.rules;
 
+        rules.sort((a,b)=>{
+            if (b.type === "import") return 1;
+            if (a.type === "import") return -1;
+            return 0;
+        })
         if (type === "main") {
             // and delete height, margin-bottom, position, transform from those rules
             // of course it is not sequentially next to each other
@@ -129,6 +128,14 @@ export default defineEventHandler(async (e) => {
                 rule.selectors = rule.selectors!.map((s) => `div#__nuxt.isolate #wiki_content ${s}`);
             })
         }
-        return cssParser.stringify(cssTree) + (type === "main" ? 'table.diff [class*="mw-diff-inline-"]{ins{background:var(--theme-success-color)}del{background:var(--theme-alert-color)}}' : "");
+        css = cssParser.stringify(cssTree) + (type === "main" ? 'table.diff [class*="mw-diff-inline-"]{ins{background:var(--theme-success-color)}del{background:var(--theme-alert-color)}}' : "");
+
+        for (const domain of assetsDomains) {
+            css = css.replaceAll(domain, `/api/assets/${domain.substring(8)}`)
+        }
+        css = css
+            .replaceAll("/wiki/Special:FilePath", `/api/wikiassets/${wiki}/filepath`)
+            .replaceAll("/load.php", `https://${wiki}.fandom.com/load.php`)
+        return css
     }
 });

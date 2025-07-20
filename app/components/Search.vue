@@ -1,14 +1,9 @@
 <template>
-  <UPopover
-  v-model:open="open"
-  >
-    <slot @click="open = !open"></slot> <!-- a button -->
-    <template #content>
-      <div class="m-4 inline-flex">
-        <UInputMenu :arrow="false" v-model:search-term="query" v-model="m" :items="items" value-key="label" class="w-full"></UInputMenu>
-      </div>
-    </template>
-  </UPopover>
+  <UButton icon="material-symbols:search-rounded" variant="ghost" color="neutral" v-if="!open" @click="open=true"/>
+
+  <div class="w-1/4" v-else>
+    <UInputMenu :arrow="false" v-model:search-term="query" v-model="m" :items="items" value-key="label" class="w-full"></UInputMenu>
+  </div>
 </template>
 
 <script setup lang="ts">

@@ -63,7 +63,11 @@
       if (!groups[firstChar]) {
         groups[firstChar] = [];
       };
-      if (member.thumbnail) member.thumbnail.source = member.thumbnail.source.replace("https://", "http://localhost:3000/api/assets/");
+      if (member.thumbnail) {
+        member.thumbnail.source = member.thumbnail.source
+          .replace("https://", "http://localhost:3000/api/assets/")
+          .replace(/scale-to-width-down\/\d*/g, "smart/width/40/height/30");
+      }
       groups[firstChar].push(member);
       return groups;
     }, {});

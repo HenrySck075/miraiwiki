@@ -1,4 +1,4 @@
-export default defineCachedEventHandler((e)=>{
+export default defineCachedEventHandler((e) => {
     const sitename = getRouterParam(e, "site")!
     const query = getQuery(e);
     const headers = {
@@ -11,14 +11,15 @@ export default defineCachedEventHandler((e)=>{
         "Origin": `https://${sitename}.fandom.com`,
         "Cookie": e.node.req.headers["cookie"] || "",
     }
-    query["action"] = getRouterParam(e, "action")!;
-    query["formatversion"] = "2";
-    query["format"] = "json";
-    return $fetch(`https://${sitename}.fandom.com/api.php`, {
+    // https://love-live.fandom.com/wikia.php?controller=ArticleCommentsController&method=getComments&title=Hanamaru Kunikida&namespace=0&hideDeleted=true
+    query["controller"] = getRouterParam(e, "ctrl")!;
+    query["method"] = getRouterParam(e, "method")!;
+    delete query["wikia"]
+    return $fetch(`https://${sitename}.fandom.com/wikia.php`, {
         query: query,
         headers: headers
     },)
 }, {
-    maxAge: 60*10,
+    maxAge: 60 * 10,
     swr: true
 })

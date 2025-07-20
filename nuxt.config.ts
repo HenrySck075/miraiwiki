@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxt/image',
   ],
+  /*
   nitro: {
     experimental: {
       database: true
@@ -13,9 +14,10 @@ export default defineNuxtConfig({
     database: {
       default: {
         connector: 'sqlite',
-        options: { name: 'headers' }
+        options: { name: 'optimus_prime' }
       },
     }
   },
+  */
   css: ["~/assets/css/main.css"]
 })
