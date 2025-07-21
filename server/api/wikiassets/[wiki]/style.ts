@@ -60,33 +60,40 @@ const assetsDomains = [
     "https://vignette5.wikia.nocookie.net"
 ]
 import * as cssParser from "css";
+import { removePrefix } from "~~/shared/utils/utils"; /// vscode is bad at noticing that these are autoimported
 export default defineEventHandler(async (e) => {
     const wiki = getRouterParam(e, "wiki");
     const theme = getQuery(e)["variant"] ?? "dark"
     const type = getQuery(e)["type"];
+    const headers = {headers: {
+        cookie: `theme=${theme}; leftPaneOpen=0;`
+    }}
     e.node.res.setHeader("content-type", "text/css")
     if (wiki) {
         let css: string = ""
         if (type === "main") {
             css = await $fetch(
                 `https://${wiki}.fandom.com/load.php?lang=en&modules=${sheetModules.join("|")}&only=styles&skin=fandomdesktop`,
-                {headers: {
-                    cookie: `theme=${theme}; leftPaneOpen=0;`
-                }}
+                headers
             );
             css = css.replaceAll("background-color:var(--theme-body-background-color);", "").replace('table.diff [class*="mw-diff-inline-"]{ins{background:var(--theme-success-color)}del{background:var(--theme-alert-color)}}', "");
             
         } else if (type === "wikiTheme") {
             css = await $fetch(`https://${wiki}.fandom.com/load.php?mode=articles&articles=MediaWiki:Themes.css&only=styles`)
         } else if (type === "category") {
-            css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=ext.fandom.CategoryPage.category-layout-selector.css%7Cext.fandom.CategoryPage.category-page3.css&only=styles&skin=fandomdesktop`)
+            css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=ext.fandom.CategoryPage.category-layout-selector.css%7Cext.fandom.CategoryPage.category-page3.css&only=styles&skin=fandomdesktop`, headers)
         } else if (type === "themeVars") {
-            css = await $fetch(`https://${wiki}.fandom.com/wikia.php?controller=ThemeApi&method=themeVariables&variant=${theme}`)
+            css = await $fetch(`https://${wiki}.fandom.com/wikia.php?controller=ThemeApi&method=themeVariables&variant=${theme}`, headers)
         }
         else {
-            /// return 404
-            e.node.res.statusCode = 404;
-            e.node.res.end("what (allowed types are 'main' and 'wikiTheme')");
+            const modules = getQuery(e)["modules"];
+            if (modules) {
+                css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=${modules}&only=styles&skin=fandomdesktop`, headers)
+            } else {
+                /// return 404
+                e.node.res.statusCode = 404;
+                e.node.res.end("what (allowed types are 'main' and 'wikiTheme')");
+            }
         }
             
         const cssTree = cssParser.parse(css);
@@ -125,7 +132,7 @@ export default defineEventHandler(async (e) => {
             rules.filter((v)=>v.type === "rule").forEach((v)=>{
                 const rule = v as cssParser.Rule;
                 // prepend "div#__nuxt.isolate #wiki_content" into selectors
-                rule.selectors = rule.selectors!.map((s) => `div#__nuxt.isolate #wiki_content ${s}`);
+                rule.selectors = rule.selectors!.map((s) => `div#__nuxt.isolate #wiki_content ${removePrefix(s, 'body')}`);
             })
         }
         css = cssParser.stringify(cssTree) + (type === "main" ? 'table.diff [class*="mw-diff-inline-"]{ins{background:var(--theme-success-color)}del{background:var(--theme-alert-color)}}' : "");

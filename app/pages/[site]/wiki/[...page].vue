@@ -1,58 +1,64 @@
 <template>
   <div id="wiki_content">
-    <div :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background`">
+    <div :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop`">
       <div class="main-container m-auto">
         <div class="fandom-community-header__background cover fullScreen"
           style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
         <div class="resizable-container">
-          <div class="page__main page" style="padding: 3rem">
+          <div class="page__main page" style="padding: 2rem">
             <div ref="themeVarsSheet">
               <template v-for="sheet in sheets">
                 <link rel="stylesheet" v-bind:href="sheet">
               </template>
             </div>
+            <UserInfo v-if="page.startsWith('User:')"></UserInfo>
             <div v-if="tuah != null">
               <div id="page-header" class="page-header" v-once>
                 <a :href="`https://${route.params.site}.fandom.com/wiki/${page}`">Link to the FANDOM page</a>
-                <div class="page-header__categories" v-if="tuah.parse.categories.length != 0">
-                  <span class="page-header__categories-in">in: </span>
-                  <template v-for="(cat, idx) in tuah.parse.categories.slice(0, 6)">
-                    <a :href="`/${route.params.site}/wiki/Category:${cat.category}`"
-                      :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_", " ")
-                      }}</a>
-                    <span v-if="idx < tuah.parse.categories.length - 1">, </span>
-                  </template>
-                  <template v-if="tuah.parse.categories.length > 6">
-                    and
-                    <UPopover mode="hover">
-                      <a href="#">{{ tuah.parse.categories.length - 6 }} more</a>
-                      <template #content>
-                        <div class="flex flex-col flex-1/2 overflow-y-scroll h-96 p-4">
-                          <template v-for="cat in tuah.parse.categories.slice(6)">
-                            <ULink :href="`/${route.params.site}/wiki/Category:${cat.category}`"
-                              :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_", "") }}
-                            </ULink>
-                          </template>
-                        </div>
-                      </template>
-                    </UPopover>
-                  </template>
-                </div>
-                <div class="page-header__bottom">
-                  <div class="page-header__title-wrapper">
-                    <h1 id="firstHeading" class="page-header__title" v-html="tuah.parse.displaytitle" ref="title"></h1>
-                    <div class="page-header__page-subtitle" v-if="namespacedPage()">{{ page.substring(0,
-                      page.search(":"))}} page</div>
+                <template v-if="!page.startsWith('User:')">
+                  <div class="page-header__categories" v-if="tuah.parse.categories.length != 0">
+                    <span class="page-header__categories-in">in: </span>
+                    <template v-for="(cat, idx) in tuah.parse.categories.slice(0, 6)">
+                      <a :href="`/${route.params.site}/wiki/Category:${cat.category}`"
+                        :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_", " ")
+                        }}</a>
+                      <span v-if="idx < tuah.parse.categories.length - 1">, </span>
+                    </template>
+                    <template v-if="tuah.parse.categories.length > 6">
+                      and
+                      <UPopover mode="hover">
+                        <a href="#">{{ tuah.parse.categories.length - 6 }} more</a>
+                        <template #content>
+                          <div class="flex flex-col flex-1/2 overflow-y-scroll h-96 p-4">
+                            <template v-for="cat in tuah.parse.categories.slice(6)">
+                              <ULink :href="`/${route.params.site}/wiki/Category:${cat.category}`"
+                                :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_",
+                                "") }}
+                              </ULink>
+                            </template>
+                          </div>
+                        </template>
+                      </UPopover>
+                    </template>
                   </div>
-                </div>
+                  <div class="page-header__bottom">
+                    <div class="page-header__title-wrapper">
+                      <h1 id="firstHeading" class="page-header__title" v-html="tuah.parse.displaytitle" ref="title">
+                      </h1>
+                      <div class="page-header__page-subtitle" v-if="namespacedPage()">{{ page.substring(0,
+                        page.search(":")) }} page</div>
+                    </div>
+                  </div>
+                </template>
               </div>
               <div id="content" class="page-content">
                 <div v-html="tuah.parse.text" ref="content"></div>
-                <CategoryMembers v-if="page.startsWith('Category:')" />
+                <CategoryMembers v-if="page.startsWith('Category:')" /> <!--Category page-->
               </div>
             </div>
           </div>
-          <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4" style="margin-top: 8px" ref="commentsNode">
+          <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"
+            style="margin-top: 8px" ref="commentsNode">
             <template v-if="comments">
               <span class="font-bold">
                 {{ comments.totalCount }} comments
@@ -103,12 +109,13 @@ const namespaces = [
 ]
 const page = (route.params.page as string[]).join("/")
 function namespacedPage() {
-  return namespaces.some(ns => route.params.page[0].startsWith(`${ns}:`));
+  return namespaces.some(ns => route.params.page![0]!.startsWith(`${ns}:`));
 }
 
 function updateTree(e: cheerio.Cheerio<SElement>) {
   e.removeAttr("srcset")
   e.removeClass("lazyload")
+  e.remove(".mw-editsection");
   if (e.is("img")) e.attr("loading", "lazy"); /*e.addClass("fancybreeze-disabledImages");*/
   for (const elem of e) {
     if (elem.tagName == "img") {
@@ -128,9 +135,6 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
       if (elem.attribs["href"]?.startsWith("/wiki/")) {
         /// TODO: more endpoints
         elem.attribs["href"] = elem.attribs["href"]!.replaceAll("/wiki", `/${route.params.site}/wiki`)
-      } else {
-        const ba = e.find(elem);
-        if (ba.hasClass("mw-editsection-visualeditor")) ba.remove();
       }
     }
   }
@@ -147,7 +151,7 @@ const { data: tuah } = await useFetch(
   const data = resp.data;
   // update the image srcs
   const $ = cheerio.load(data.value.parse.text);
-  const doc = $("body > div").find("img, a");
+  const doc = $("body > div").find("img, a, span");
   updateTree(doc);
   data.value.parse.text = $("body > div").html();
   //console.log(data);
@@ -231,7 +235,7 @@ type beef = ({
 });
 let comments: Ref<beef | null> = ref(null);
 const isCommentsVisible = useElementVisibility(useTemplateRef("commentsNode"));
-watch(isCommentsVisible, async (e)=>{
+watch(isCommentsVisible, async (e) => {
   if (e && comments.value == null) {
     comments.value = (await useFetch<beef>(`/api/${route.params.site}/ArticleCommentsController/getComments`, {
       query: {
@@ -239,7 +243,7 @@ watch(isCommentsVisible, async (e)=>{
         namespace: "0", /// TODO
         hideDeleted: true
       }
-    })).data.value
+    })).data.value!
   }
 });
 
