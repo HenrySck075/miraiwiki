@@ -1,5 +1,5 @@
 <template>
-  <div id="wiki_content">
+  <div id="wiki_content" v-if="hatred">
     <div :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop`">
       <div class="main-container m-auto">
         <div class="fandom-community-header__background cover fullScreen"
@@ -33,7 +33,7 @@
                             <template v-for="cat in tuah.parse.categories.slice(6)">
                               <ULink :href="`/${route.params.site}/wiki/Category:${cat.category}`"
                                 :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_",
-                                "") }}
+                                " ") }}
                               </ULink>
                             </template>
                           </div>
@@ -72,6 +72,9 @@
       </div>
     </div>
   </div>
+  <span v-else>
+    not doing allat
+  </span>
 </template>
 
 <script setup lang="ts">
@@ -79,6 +82,10 @@ import * as cheerio from 'cheerio';
 import { Element as SElement } from 'domhandler';
 
 import { useElementVisibility } from '@vueuse/core';
+const route = useRoute();
+if ((route.params.site! as string).endsWith(".fandom.com")) {
+  await navigateTo(route.fullPath.replace(".fandom.com", ""));
+}
 
 definePageMeta({
   layout: "wiki"
@@ -86,30 +93,34 @@ definePageMeta({
 
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 
-const route = useRoute();
 const namespaces = [
-  "Media",
+  //"Media",
   "Special",
   "Talk",
   "User",
-  "User_talk",
+  "User talk",
   "Project",
-  "Project_talk",
+  "Project talk",
   "File",
-  "File_talk",
+  "File talk",
   "MediaWiki",
-  "MediaWiki_talk",
+  "MediaWiki talk",
   "Template",
-  "Template_talk",
+  "Template talk",
   "Help",
-  "Help_talk",
+  "Help talk",
   "Category",
-  "Category_talk",
+  "Category talk",
   // TODO: wiki ns
 ]
 const page = (route.params.page as string[]).join("/")
 function namespacedPage() {
   return namespaces.some(ns => route.params.page![0]!.startsWith(`${ns}:`));
+}
+
+const hatred = !page.startsWith("User blog:")
+if (!hatred) {
+  await navigateTo(`/${route.params.site}`)
 }
 
 function updateTree(e: cheerio.Cheerio<SElement>) {
@@ -136,6 +147,8 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
         /// TODO: more endpoints
         elem.attribs["href"] = elem.attribs["href"]!.replaceAll("/wiki", `/${route.params.site}/wiki`)
       }
+    } else if (elem.tagName == "audio" && elem.attribs["src"]) {
+      elem.attribs["src"] = elem.attribs["src"]!.replace("https://", '/api/assets/');
     }
   }
 }
@@ -151,7 +164,7 @@ const { data: tuah } = await useFetch(
   const data = resp.data;
   // update the image srcs
   const $ = cheerio.load(data.value.parse.text);
-  const doc = $("body > div").find("img, a, span");
+  const doc = $("body > div").find("img, a, span, audio");
   updateTree(doc);
   data.value.parse.text = $("body > div").html();
   //console.log(data);
@@ -256,7 +269,7 @@ useHead({
   }]
 })
 useSeoMeta({
-  title: `${displayTitle} | ${meta.value.sitename} + FancyBreeze`
+  title: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`
 })
 </script>
 
