@@ -20,25 +20,35 @@
                     <span class="page-header__categories-in">in: </span>
                     <template v-for="(cat, idx) in tuah.parse.categories.slice(0, 6)">
                       <a :href="`/${route.params.site}/wiki/Category:${cat.category}`"
-                        :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_", " ")
-                        }}</a>
-                      <span v-if="idx < tuah.parse.categories.length - 1">, </span>
+                        :title="`Category:${cat.category.replaceAll('_', ' ')}`">
+                        {{ cat.category.replaceAll("_", " ") }}
+                      </a>
+                      <span v-if="idx < 6">, </span>
                     </template>
                     <template v-if="tuah.parse.categories.length > 6">
-                      and
-                      <UPopover mode="hover">
-                        <a href="#">{{ tuah.parse.categories.length - 6 }} more</a>
-                        <template #content>
-                          <div class="flex flex-col flex-1/2 overflow-y-scroll h-96 p-4">
-                            <template v-for="cat in tuah.parse.categories.slice(6)">
-                              <ULink :href="`/${route.params.site}/wiki/Category:${cat.category}`"
-                                :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_",
-                                " ") }}
-                              </ULink>
-                            </template>
-                          </div>
-                        </template>
-                      </UPopover>
+                      <template v-for="(cat, idx) in tuah.parse.categories.slice(6, 8)" v-if="tuah.parse.categories.length <= 8">
+                        <a :href="`/${route.params.site}/wiki/Category:${cat.category}`"
+                          :title="`Category:${cat.category.replaceAll('_', ' ')}`">
+                          {{ cat.category.replaceAll("_", " ") }}
+                        </a>
+                        <span v-if="idx < 1">, </span>
+                      </template>
+                      <template v-else>
+                        and
+                        <UPopover mode="hover">
+                          <a href="#">{{ tuah.parse.categories.length - 6 }} more</a>
+                          <template #content>
+                            <div class="flex flex-col flex-1/2 overflow-y-scroll h-96 p-4">
+                              <template v-for="cat in tuah.parse.categories.slice(6)">
+                                <ULink :href="`/${route.params.site}/wiki/Category:${cat.category}`"
+                                  :title="`Category:${cat.category.replaceAll('_', ' ')}`">{{ cat.category.replaceAll("_",
+                                  " ") }}
+                                </ULink>
+                              </template>
+                            </div>
+                          </template>
+                        </UPopover>
+                      </template>
                     </template>
                   </div>
                   <div class="page-header__bottom">
@@ -58,7 +68,7 @@
             </div>
           </div>
           <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"
-            style="margin-top: 8px" ref="commentsNode">
+            style="margin-top: 8px" ref="commentsNode" v-if="!page.startsWith('Category:')">
             <template v-if="comments">
               <span class="font-bold">
                 {{ comments.totalCount }} comments
@@ -68,6 +78,7 @@
               </template>
             </template>
           </div>
+          <div class="h-96"></div>
         </div>
       </div>
     </div>
@@ -82,6 +93,8 @@ import * as cheerio from 'cheerio';
 import { Element as SElement } from 'domhandler';
 
 import { useElementVisibility } from '@vueuse/core';
+import { defineCustomElement } from 'vue';
+import { FAudio } from '#components';
 const route = useRoute();
 if ((route.params.site! as string).endsWith(".fandom.com")) {
   await navigateTo(route.fullPath.replace(".fandom.com", ""));
@@ -123,6 +136,16 @@ if (!hatred) {
   await navigateTo(`/${route.params.site}`)
 }
 
+const sheets = [
+  `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&type=main`,
+  `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&type=wikiTheme`,
+  `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&type=themeVars`,
+  /*
+  `https://${route.params.site}.fandom.com/load.php?mode=articles&articles=u:dev:MediaWiki:Global_Lua_Modules/Navbox.css&only=styles`,
+  `https://${route.params.site}.fandom.com/load.php?mode=articles&articles=u:dev:MediaWiki:DropdownMenu.css&only=styles`,
+  */
+];
+
 function updateTree(e: cheerio.Cheerio<SElement>) {
   e.removeAttr("srcset")
   e.removeClass("lazyload")
@@ -149,9 +172,13 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
       }
     } else if (elem.tagName == "audio" && elem.attribs["src"]) {
       elem.attribs["src"] = elem.attribs["src"]!.replace("https://", '/api/assets/');
+      elem.attribs["preload"] = "none";
+      delete elem.attribs["width"];
+      //elem.tagName = "fancybreeze-audio";
     }
   }
 }
+let includeWDSIcons = false;
 const { data: tuah } = await useFetch(
   `/api/${route.params.site}/parse`,
   {
@@ -166,26 +193,27 @@ const { data: tuah } = await useFetch(
   const $ = cheerio.load(data.value.parse.text);
   const doc = $("body > div").find("img, a, span, audio");
   updateTree(doc);
+  
+  const sliders = $("div.fandom-slider");
+  if (sliders.length != 0) {
+    sheets.push(`/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&modules=ext.fandom.slider.css|ext.fandom.photoGallery.gallery.css`)
+    sliders.find(".fandom-slider__nav__caption div:first-child").addClass("fancybreeze-slider__caption-cur");
+    includeWDSIcons = true;
+  }
   data.value.parse.text = $("body > div").html();
   //console.log(data);
   return { data: data };
 })
 const displayTitle = cheerio.load(tuah.value.parse.displaytitle, null, false)("*").text();
 
-const sheets = [
-  `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&type=main`,
-  `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&type=wikiTheme`,
-  `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&type=themeVars`,
-  /*
-  `https://${route.params.site}.fandom.com/load.php?mode=articles&articles=u:dev:MediaWiki:Global_Lua_Modules/Navbox.css&only=styles`,
-  `https://${route.params.site}.fandom.com/load.php?mode=articles&articles=u:dev:MediaWiki:DropdownMenu.css&only=styles`,
-  */
-]
-
 const content = useTemplateRef("content");
 const title = useTemplateRef("title");
 onMounted(() => {
-  content.value?.querySelectorAll("div.wds-tabber").forEach(e => e.querySelectorAll(".wds-tabs__wrapper > .wds-tabs > li").forEach((elem, idx) => {
+  //customElements.define("fancybreeze-audio", defineCustomElement(FAudio))
+
+  const contentNode = content.value!;
+
+  contentNode.querySelectorAll("div.wds-tabber").forEach(e => e.querySelectorAll(".wds-tabs__wrapper > .wds-tabs > li").forEach((elem, idx) => {
     elem.addEventListener("click", (e) => {
       // remove .wds-is-current from all .wds-tab__content
       // and add it back to the content corresponds to the index
@@ -208,7 +236,7 @@ onMounted(() => {
   }))
 
   // bind onclick to all anchor elements (that is obviously clickable) to call navigateTo
-  content.value?.querySelectorAll("a").forEach((elem) => {
+  contentNode.querySelectorAll("a").forEach((elem) => {
     if (elem.href && !elem.href.startsWith("#")) {
       elem.addEventListener("click", (e) => {
         e.preventDefault();
@@ -216,6 +244,11 @@ onMounted(() => {
       });
     }
   });
+
+  contentNode.querySelectorAll("audio.mw-file-element").forEach((v)=>{
+    (v as HTMLAudioElement).style.minWidth = (v as HTMLAudioElement).style.width;
+    (v as HTMLAudioElement).style.width = ""
+  })
 
   // remove every elements in title that is not span.mw-page-title-main
   if (title.value) {
@@ -228,6 +261,28 @@ onMounted(() => {
         }*/
     });
   }
+  
+  for (const slider of contentNode.querySelectorAll("div.fandom-slider")) {
+    const sliderList: HTMLDivElement = slider.querySelector(".fandom-slider__list")!;
+    const sliderCaptions = slider.querySelector(".fandom-slider__nav .fandom-slider__nav__caption")!;
+
+    const count = sliderList.getElementsByClassName("gallerybox").length;
+    let idx = 0;
+    let shift = 0;
+    setInterval(()=>{
+      if (idx+1==count) {
+        shift=0;
+        idx=0;
+      }
+      else {
+        shift+=(sliderList.querySelector(`.gallerybox[data-index="${idx}"]`)! as HTMLDivElement).offsetWidth;
+        idx++;
+      }
+      sliderList.style.marginLeft = -(shift).toString()+"px";
+      sliderCaptions.querySelector("div.fancybreeze-slider__caption-cur")!.classList.remove("fancybreeze-slider__caption-cur");
+      sliderCaptions.querySelector(`div[data-index="${idx}"]`)!.classList.add("fancybreeze-slider__caption-cur")
+    }, 8000)
+  }
 })
 
 const themeVarsSheet = useTemplateRef("themeVarsSheet");
@@ -238,7 +293,6 @@ watch(currentTheme, () => {
   );
   //console.log("Theme changed to: ", currentTheme.value);
 });
-
 // https://love-live.fandom.com/wikia.php?controller=ArticleCommentsController&method=getComments&title=Hanamaru Kunikida&namespace=0&hideDeleted=true
 type beef = ({
   links: any[],
@@ -266,7 +320,17 @@ useHead({
     rel: "icon",
     type: 'image/x-icon',
     href: meta.value["favicon"].replace("$wgUploadPath", `https://static.wikia.nocookie.net/${route.params.site}/images`)
-  }]
+  }],
+  /// TODO: no mediawiki engine object we need to do this ourselves
+  /*
+  script: ()=>{
+    return includeWDSIcons ? [
+      {
+        src: `/api/wikiassets/${route.params.site}/style?variant=${currentTheme.value.toLowerCase()}&modules=u:dev:MediaWiki:WDSIcons/code.js`
+      }
+    ] : []
+  }
+  */
 })
 useSeoMeta({
   title: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`
@@ -293,5 +357,10 @@ useSeoMeta({
 
 .fancybreeze-disabledImages {
   display: none;
+}
+
+.fancybreeze-slider__caption-cur {
+  display: block !important;
+  opacity: 1 !important;
 }
 </style>

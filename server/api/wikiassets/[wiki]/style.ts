@@ -86,9 +86,13 @@ export default defineEventHandler(async (e) => {
             css = await $fetch(`https://${wiki}.fandom.com/wikia.php?controller=ThemeApi&method=themeVariables&variant=${theme}`, headers)
         }
         else {
-            const modules = getQuery(e)["modules"];
+            const modules = getQuery(e)["modules"] as string;
             if (modules) {
-                css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=${modules}&only=styles&skin=fandomdesktop`, headers)
+                css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=${modules}${modules.includes('.js') ? '' : '&only=styles'}&skin=fandomdesktop`, headers)
+                if (modules.includes(".js")) {
+                    e.node.res.setHeader("content-type", "text/javascript");
+                    return css;
+                }
             } else {
                 /// return 404
                 e.node.res.statusCode = 404;
