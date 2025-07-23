@@ -94,6 +94,7 @@ import { Element as SElement } from 'domhandler';
 
 import { useElementVisibility } from '@vueuse/core';
 import type { Comment as WikiaComment } from '~~/shared/types/comment';
+import { convertAssetsURL } from '~~/shared/utils/utils';
 const route = useRoute();
 if ((route.params.site! as string).endsWith(".fandom.com")) {
   await navigateTo(route.fullPath.replace(".fandom.com", ""));
@@ -162,7 +163,7 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
         elem.attribs['src'] = newSrc;
         delete elem.attribs['data-src']
       } else if (src) {
-        elem.attribs["src"] = src.replace("https://", '/api/assets/');
+        elem.attribs["src"] = convertAssetsURL(src);
       }
     } else if (elem.tagName == "a") {
       if (elem.attribs["href"]?.startsWith("/wiki/")) {

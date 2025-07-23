@@ -6,7 +6,6 @@ interface href {
   href: string;
 }
 
-/// /wikia.php?controller=DiscussionThread&method=getThreads&responseGroup=small&sortDirection=descending&sortKey=trending&viewableOnly=true&limit=20&pivot=4400000000000273078&page=1
 export interface DiscussionThreads {
   _links: {
     first: href[],
@@ -27,6 +26,6 @@ export interface DiscussionThreads {
 
 export interface DiscussionForums extends Forum {
   _embedded: {
-    "doc:forum": Forum[];
+    "doc:forum"?: Forum[];
   }
 }

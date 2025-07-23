@@ -1,5 +1,6 @@
 <template>
-  <div class="!p-4 w-full bg-accented rounded-md flex flex-col space-y-2 overflow-hidden">
+  <div class="!p-4 w-full bg-elevated rounded-md flex flex-col space-y-2 overflow-hidden">
+    <slot name="header"></slot>
     <div class="flex flex-row !space-x-1" style="align-items: center;">
       <UAvatar :src="data.createdBy.avatarUrl"></UAvatar>
       <div class="flex flex-col !space-y-1" style="align-items:start">
@@ -18,19 +19,20 @@
     </ULink>
     <!--questionable content-->
     <WikiaDoc class="fancybreeze-post__content" v-if="content" :content="content" :attachments="data._embedded.attachments[0]!"></WikiaDoc>
-    <span class="inline-block space-x-2">
+    <span class="inline-block space-x-2" v-if="data.tags.length!=0">
       <UIcon name="material-symbols:label-rounded"></UIcon>
-      <div class="inline-flex">
+      <span class="inline-block">
         <template v-for="(tag, idx) in data.tags">
           <span v-if="idx!=0">, </span>
-          <ULink :to="`${route.params.site}${tag.relativeUrl}`">{{ tag.articleTitle }}</ULink>
+          <ULink :to="`/${route.params.site}${tag.relativeUrl}`">{{ tag.articleTitle }}</ULink>
         </template>
-      </div>
+      </span>
     </span>
     <div class="flex flex-row space-x-4">
       <UButton class="!px-0" icon="material-symbols:favorite-outline" color="neutral" variant="link">{{ data.upvoteCount }}</UButton>
       <UButton class="!px-0" icon="material-symbols:chat-bubble-outline-rounded" color="neutral" variant="link">{{ data.postCount }}</UButton>
     </div>
+    <slot name="content"></slot>
   </div>
 </template>
 

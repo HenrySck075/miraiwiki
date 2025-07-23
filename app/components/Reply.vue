@@ -1,7 +1,7 @@
 <template>
   <div class="inline-flex space-x-4">
-    <div class="w-3 h-full bg-elevated"></div>
-    <CommentBase :data="data" class="bg-elevated"></CommentBase>
+    <div class="w-1 bg-default"></div>
+    <CommentBase :data="data" class="!bg-default"></CommentBase>
   </div>
 </template>
 

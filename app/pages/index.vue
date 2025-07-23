@@ -44,7 +44,7 @@ function onClick2ah() {
 }
 </script>
 
-<style>
+<style scoped>
 @reference "tailwindcss";
 
 h1 {

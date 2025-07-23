@@ -16,11 +16,17 @@
         </UButton>
       </UDropdownMenu>
     </div>
-    <div class="overflow-y-scroll">
+    <div id="fancybreeze-content" class="overflow-y-scroll">
       <slot></slot>
     </div>
   </div>
 </template>
+
+<style>
+#fancybreeze-content > div {
+  --f-max-width: 988px;
+}
+</style>
 
 <script setup lang="ts">
 import {load as cheerioLoad} from 'cheerio';
@@ -29,6 +35,7 @@ import {load as cheerioLoad} from 'cheerio';
 type mope = {
     label: string,
     to: string,
+    icon?: string,
     "class"?: string,
     children?: mope[]
 }
@@ -82,6 +89,28 @@ const headers = await useFetch(
     }
     return ret
   }
-  return airth(content);
+  return [
+    {
+      label: "Explore",
+      to: "#",
+      children: [
+        {
+          label: "Main Page",
+          icon: "material-symbols:other-houses-outline",
+          to: "/"+route.params.site
+        },
+        {
+          label: "Discuss",
+          icon: "material-symbols:forum-outline",
+          to: `/${route.params.site}/f`
+        },
+        {
+          label: "All pages",
+          to: `/${route.params.site}/wiki/Special:AllPages`
+        }
+      ]
+    },
+    ...airth(content)
+  ];
 })
 </script>

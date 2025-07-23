@@ -1,5 +1,7 @@
+import type { Post } from "../comment";
 import type { ContentImage, Timestamp, User } from "../wikia";
 import type { Attachment, Attachments } from "../wikia_doc";
+import type { ThreadPost } from "./thread_post";
 
 export interface Tag {
   siteId: string;
@@ -23,7 +25,7 @@ export interface Poll {
   // totalVotes: number;
 }
 
-export interface Thread {
+interface ThreadInternal {
   createdBy: User;
   creationDate: Timestamp;
   firstPostId: string;
@@ -54,6 +56,17 @@ export interface Thread {
   trendingScore: number;
   upvoteCount: number;
   poll?: Poll; // Optional poll object
+}
+
+export interface Thread extends ThreadInternal {
   _embedded: Attachments;
 }
 
+interface AttachmentsExtra extends Attachments {
+  /// theres firstPost but its essentially Thread but represented as a Comment
+  "doc:posts": ThreadPost[];
+}
+
+export interface ThreadExtra extends ThreadInternal {
+  _embedded: AttachmentsExtra;
+}

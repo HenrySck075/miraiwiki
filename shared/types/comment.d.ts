@@ -1,23 +1,6 @@
 import type { ContentImage, Timestamp, User } from "./wikia";
 import type { Attachment, DocModel } from "./wikia_doc";
-
-export interface Post {
-    id: string;
-    creationDate: Timestamp;
-    upvoteCount: number;
-    userData: {
-        postId: number;
-        hasUpvoted: boolean;
-        permissions: {
-            canEdit: boolean;
-            canDelete: boolean;
-        };
-        isReported: boolean;
-    };
-    jsonModel: string;
-    attachments: Attachment;
-    createdBy: User;
-}
+import type { Post } from "./post";
 
 export interface Comment {
     id: string;

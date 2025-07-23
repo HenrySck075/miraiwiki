@@ -1,12 +1,12 @@
 import type { Timestamp, User } from "../wikia";
 
 export interface LatestContribution {
-    siteId: number;
-    forumId: number;
-    item: string;
-    itemId: number;
-    author: number;
-    date: Timestamp;
+    siteId: number|null;
+    forumId: number|null;
+    item: string|null;
+    itemId: number|null;
+    author: number|null;
+    date?: Timestamp;
 }
 
 export interface Forum {
