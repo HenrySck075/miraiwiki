@@ -1,5 +1,5 @@
 import type { ContentImage, Timestamp, User } from "./wikia";
-import type { DocModel } from "./wikia_doc";
+import type { Attachment, DocModel } from "./wikia_doc";
 
 export interface Post {
     id: string;
@@ -15,30 +15,7 @@ export interface Post {
         isReported: boolean;
     };
     jsonModel: string;
-    attachments: {
-        openGraphs: {
-            id: string;
-            postRevisionId: number;
-            siteId: number;
-            url: string;
-            siteName: string;
-            title: string;
-            type: string;
-            imageUrl: string;
-            description: string;
-            originalUrl: string;
-            imageHeight: number;
-            imageWidth: number;
-            dateRetrieved: {
-                nano: number;
-                epochSecond: number;
-            };
-        }[];
-        contentImages: ContentImage[];
-        polls: any[];
-        quizzes: any[];
-        atMentions: any[];
-    };
+    attachments: Attachment;
     createdBy: User;
 }
 

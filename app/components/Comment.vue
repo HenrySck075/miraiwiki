@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-
+  import type { Comment as WikiaComment } from '~~/shared/types/comment';
   const {data} = defineProps<{
     data: WikiaComment
   }>();

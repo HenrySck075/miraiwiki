@@ -1,4 +1,5 @@
 import type { ContentImage, Timestamp, User } from "../wikia";
+import type { Attachment, Attachments } from "../wikia_doc";
 
 export interface Tag {
   siteId: string;
@@ -8,23 +9,9 @@ export interface Tag {
   image: string | null;
 }
 
-export interface Attachment {
-  atMentions: any[]; // You might want to define a more specific type for atMentions if known
-  contentImages: ContentImage[];
-  openGraphs: any[]; // You might want to define a more specific type for openGraphs if known
-  polls: any[]; // You might want to define a more specific type for polls if known
-  quizzes: any[]; // You might want to define a more specific type for quizzes if known
-}
-
 export interface UserData {
   hasReported: boolean;
   hasUpvoted: boolean;
-}
-
-export interface Embedded {
-  contentImages: ContentImage[];
-  attachments: Attachment[];
-  userData: UserData[];
 }
 
 export interface Poll {
@@ -67,6 +54,6 @@ export interface Thread {
   trendingScore: number;
   upvoteCount: number;
   poll?: Poll; // Optional poll object
-  _embedded: Embedded;
+  _embedded: Attachments;
 }
 

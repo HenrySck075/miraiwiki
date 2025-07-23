@@ -36,3 +36,41 @@ interface LinkContentMarker extends ContentMarkerBase {
 }
 
 
+
+
+
+
+
+
+export interface OpenGraph {
+  id: string;
+  postRevisionId: number;
+  siteId: number;
+  url: string;
+  siteName: string;
+  title: string;
+  type: string;
+  imageUrl: string;
+  description: string;
+  originalUrl: string;
+  imageHeight: number;
+  imageWidth: number;
+  dateRetrieved: {
+    nano: number;
+    epochSecond: number;
+  };
+};
+export interface Attachment {
+  atMentions: any[]; // You might want to define a more specific type for atMentions if known
+  contentImages: ContentImage[];
+  openGraphs: OpenGraph[]; // You might want to define a more specific type for openGraphs if known
+  polls: any[]; // You might want to define a more specific type for polls if known
+  quizzes: any[]; // You might want to define a more specific type for quizzes if known
+}
+
+
+export interface Attachments {
+  contentImages: ContentImage[];
+  attachments: Attachment[];
+  userData: UserData[];
+}

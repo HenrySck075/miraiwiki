@@ -93,8 +93,7 @@ import * as cheerio from 'cheerio';
 import { Element as SElement } from 'domhandler';
 
 import { useElementVisibility } from '@vueuse/core';
-import { defineCustomElement } from 'vue';
-import { FAudio } from '#components';
+import type { Comment as WikiaComment } from '~~/shared/types/comment';
 const route = useRoute();
 if ((route.params.site! as string).endsWith(".fandom.com")) {
   await navigateTo(route.fullPath.replace(".fandom.com", ""));
@@ -296,7 +295,7 @@ watch(currentTheme, () => {
 // https://love-live.fandom.com/wikia.php?controller=ArticleCommentsController&method=getComments&title=Hanamaru Kunikida&namespace=0&hideDeleted=true
 type beef = ({
   links: any[],
-  threads: Comment[],
+  threads: WikiaComment[],
   totalCount: number,
   readOnlyMode: boolean
 });
