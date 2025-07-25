@@ -27,3 +27,5 @@ logs
 .headers
 
 mine/
+
+public/indies_*.json

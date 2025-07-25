@@ -1,6 +1,6 @@
 <template>
-  <!--TODO: uhh maybe move welcome container to the left on widescreen-->
   <div class="px-3 mx-auto" style="max-width: var(--f-max-width);" v-if="data">
+    <!--TODO: uhh maybe move welcome container to the left on widescreen-->
     <div class="flex flex-row mb-2" style="grid-area: main">
       <UPopover mode="hover">
         <UButton trailing-icon="material-symbols:keyboard-arrow-down-rounded">Categories</UButton>
@@ -112,7 +112,6 @@
 </template>
 
 <script setup lang="ts">
-import type { ShallowRef } from 'vue';
 import type { FeedsAndPosts } from '~~/shared/types/feeds';
 import type { Forum } from '~~/shared/types/forum/forum';
 import type { DiscussionThreads } from '~~/shared/types/forum/resp';
@@ -125,12 +124,14 @@ function threadCountOf(forum: Forum) {
 }
 
 definePageMeta({
-  layout: "wiki"
+  layout: "wiki",
+  // setting the page key prevents nuxt app from being accessible
+  //key: "discussions"
 })
 
 const threads= ref<Thread[]>([])
 const data = ref<DiscussionThreads>();
-let nextThreadsUrl: string | null = "https://love-live.fandom.com/wikia.php?controller=DiscussionThread&method=getThreads&responseGroup=small&sortDirection=descending&sortKey=trending&viewableOnly=true&limit=20&pivot=4400000000000273078&page=0";
+let nextThreadsUrl: string | null = "https://love-live.fandom.com/wikia.php?controller=DiscussionThread&method=getThreads&responseGroup=small&sortDirection=descending&sortKey=trending&viewableOnly=true&limit=20&page=0";
 
 async function fetchThreads() {
   let uri = URL.parse(nextThreadsUrl!);
@@ -151,8 +152,9 @@ async function fetchThreads() {
 }
 await fetchThreads();
 const {data: feeds} = await useFetch<FeedsAndPosts>(`/api/${route.params.site}/FeedsAndPosts/getAll`)
-
-
+useSeoMeta({
+  title: ()=>`Discuss everything about ${feeds.value?.wikiVariables.name} | FancyBreeze`
+})
 </script>
 
 <style>

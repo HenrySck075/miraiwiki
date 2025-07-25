@@ -27,19 +27,18 @@ interface OpenGraphModel extends ModelBase {
 }
 interface ContentModel extends ModelBase {
     type: "text";
-    marks: (LinkContentMarker)[]
+    marks?: (LinkContentMarker)[]
     text: string;
 }
-interface ContentMarkerBase extends ModelBase {}
-interface LinkContentMarker extends ContentMarkerBase {
-    type: "link"
+interface ContentMarkerBase extends ModelBase {
+    attrs: object
 }
-
-
-
-
-
-
+interface LinkContentMarker extends ContentMarkerBase {
+    type: "link";
+    attrs: {
+        href: string
+    }
+}
 
 
 export interface OpenGraph {

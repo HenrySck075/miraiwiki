@@ -3,6 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "curl -o public/indies_en.json 'https://raw.githubusercontent.com/KevinPayravi/indie-wiki-buddy/refs/heads/main/data/sitesEN.json'",
+    "prebuild": "curl -o public/indies_en.json 'https://raw.githubusercontent.com/KevinPayravi/indie-wiki-buddy/refs/heads/main/data/sitesEN.json'",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",

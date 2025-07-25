@@ -17,12 +17,23 @@ export interface UserData {
 }
 
 export interface Poll {
-  // Define the structure of the poll object if it's ever present
-  // For example:
-  // id: string;
-  // question: string;
-  // options: { id: string; text: string; votes: number; }[];
-  // totalVotes: number;
+  id: number;
+  question: string;
+  answers: {
+    id: number;
+    text: string;
+    position: number;
+    votes: number;
+    image: {
+      url: string;
+      height: number;
+      width: number;
+      mediaType: string;
+    };
+  }[];
+  totalVotes: number;
+  /// ids of votes that the user picked
+  userVotes: number[] | null; 
 }
 
 interface ThreadInternal {
@@ -55,7 +66,16 @@ interface ThreadInternal {
   title: string;
   trendingScore: number;
   upvoteCount: number;
-  poll?: Poll; // Optional poll object
+  poll?: Poll;
+  /*
+  POST https://love-live.fandom.com/wikia.php?controller=DiscussionPoll&method=castVote
+  Content-Disposition: form-data; name="answerIds"
+
+  20516647
+  Content-Disposition: form-data; name="pollId"
+
+  5301294
+  */
 }
 
 export interface Thread extends ThreadInternal {

@@ -1,7 +1,7 @@
 <template>
   <div id="userProfileApp"> <!--User page-->
     <link rel="stylesheet"
-      :href="`/api/wikiassets/${route.params.site}/style?variant=${currentTheme.toLowerCase()}&modules=ext.fandom.UserProfile.css`">
+      :href="`/api/wikiassets/${site}/style?variant=${currentTheme.toLowerCase()}&modules=ext.fandom.UserProfile.css`">
     <template v-if="meta">
       <div class="user-identity-box__wrapper">
         <section class="user-identity-box" itemtype="http://schema.org/Person">
@@ -23,11 +23,11 @@
               <div class="user-identity-header__actions"></div>
             </div>
             <ul class="user-identity-stats">
-              <li><a :href="`/${route.params.site}/wiki/Special:Contributions/${meta.userData.username}`">
+              <li><a :href="`/${site}/wiki/Special:Contributions/${meta.userData.username}`">
                   <strong>{{ meta.userData.edits }}</strong> edits</a>
               </li>
               <li><a
-                  :href="`/${route.params.site}/wiki/Special:UserProfileActivity/${meta.userData.username}?tab=posts`">
+                  :href="`/${site}/wiki/Special:UserProfileActivity/${meta.userData.username}?tab=posts`">
                   <strong>{{ meta.userData.posts }}</strong> posts</a>
               </li>
             </ul>
@@ -36,11 +36,11 @@
       </div>
       <ul class="user-profile-navigation">
         <li class="user-profile-navigation__link is-active"><a
-            :href="`/${route.params.site}/wiki/User:${meta.userData.username}`">About</a></li>
-        <li class="user-profile-navigation__link "><a :href="`/${route.params.site}${meta.userData.messageWallUrl}`">Message Wall</a></li>
-        <li class="user-profile-navigation__link "><a :href="`/${route.params.site}${meta.userData.userBlogUrl}`">Blog</a></li>
-        <li class="user-profile-navigation__link "><a :href="`/${route.params.site}${meta.userData.contributionsUrl}`">Contributions</a></li>
-        <li class="user-profile-navigation__link "><a :href="`/${route.params.site}${meta.userData.userProfileActivityUrl}`">Activity</a>
+            :href="`/${site}/wiki/User:${meta.userData.username}`">About</a></li>
+        <li class="user-profile-navigation__link "><a :href="`/${site}${meta.userData.messageWallUrl}`">Message Wall</a></li>
+        <li class="user-profile-navigation__link "><a :href="`/${site}${meta.userData.userBlogUrl}`">Blog</a></li>
+        <li class="user-profile-navigation__link "><a :href="`/${site}${meta.userData.contributionsUrl}`">Contributions</a></li>
+        <li class="user-profile-navigation__link "><a :href="`/${site}${meta.userData.userProfileActivityUrl}`">Activity</a>
         </li>
       </ul>
     </template>
@@ -51,13 +51,15 @@
 import type { APIResponse, Query, Query_AllUsers } from '~~/shared/types/actionapi';
 ///{"userData":{"id":4403388,"username":"Fandom","avatar":"https:\/\/static.wikia.nocookie.net\/84586f7d-1103-4bbe-b69a-08de7e6ccb4c\/thumbnail\/width\/400\/height\/400","name":"","bio":"","website":"","twitter":"","fbPage":"","discordHandle":"","hideEditsWikis":0,"edits":"20","registration":"9 August 2017","userPage":"https:\/\/love-live.fandom.com\/wiki\/User:Fandom","contributionsUrl":"\/wiki\/Special:Contributions\/Fandom","userProfileActivityUrl":"\/wiki\/Special:UserProfileActivity\/Fandom","messageWallUrl":"\/wiki\/Message_Wall:Fandom","messageWallNewMessageUrl":"\/wiki\/Message_Wall:Fandom?wall-editor=new","userBlogUrl":"\/wiki\/User_blog:Fandom","showZeroStates":true,"tags":["Staff"],"posts":2,"discussionUserUrl":"\/f\/u\/4403388","isUserPageOwner":false,"canEditProfile":false,"canRemoveAvatar":false,"isBlocked":false,"isMessageWallBlocked":false,"localEdits":20},"isReadOnly":false}
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
-const route = useRoute();
-console.log(route.params.page);
+const {user, site} = defineProps<{
+  site: string,
+  user: string
+}>();
 ///https://love-live.fandom.com/wikia.php?controller=UserProfile&method=getUserData&format=json&userId=25708385
-const userid = await useFetch<APIResponse<[Query<[Query_AllUsers]>]>>(`/api/${route.params.site}/query`, {
+const userid = await useFetch<APIResponse<[Query<[Query_AllUsers]>]>>(`/api/${site}/query`, {
   query: {
     "list": "allusers",
-    "aufrom": removePrefix(route.params.page![0]!, "User:"),
+    "aufrom": user,
     "aulimit": "1"
   }
 }).then(data => data.data.value!.query.allusers[0]!.userid);
@@ -98,7 +100,7 @@ interface UserProfileResponse {
   isReadOnly: boolean;
 }
 
-const { data: meta } = await useFetch<UserProfileResponse>(`/api/${route.params.site}/UserProfile/getUserData`, {
+const { data: meta } = await useFetch<UserProfileResponse>(`/api/${site}/UserProfile/getUserData`, {
   query: {
     format: "json",
     userId: userid
