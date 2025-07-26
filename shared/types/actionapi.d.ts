@@ -1,7 +1,7 @@
 import type { Spread } from "./objmerger";
 
 interface APIResponseBase {
-    batchcomplete: boolean;
+  batchcomplete: boolean;
 }
 
 export type APIResponse<A extends readonly [...any]> = Spread<[APIResponseBase, ...A]>;
@@ -211,11 +211,74 @@ interface UserInfoObj {
   options?: UserOptions;
 }
 
-export type Query_UserInfo = ({userinfo: UserInfoObj});
+export type Query_UserInfo = ({ userinfo: UserInfoObj });
 
-export type Query_AllUsers = ({allusers: {
+export type Query_AllUsers = ({
+  allusers: {
     userid: number;
     name: string;
-}[]})
+  }[]
+})
 
-export type Query<A extends readonly [...any]> = ({query: Spread<A>})
+export type Query_OPage<A extends readonly [...object] = []> = Spread<[{
+  /// base response
+  pageid: number,
+  ns: number,
+  title: string,
+}, ...A]>
+export type Query_Pages<A extends readonly [...object] = []> = ({
+  pages: Query_OPage<A>[]
+})
+
+export type Query_Pages_PInfo = ({
+  contentmodel: string,
+  pagelanguage: string,
+  pagelanguagehtmlcode: string,
+  pagelanguagedir: string,
+  touched: string,
+  lastrevid: number,
+  length: number
+})
+
+export type Query_Pages_PPageImages<A extends readonly [...QPPPIProp] = [Query_Pages_PPageImages_name, Query_Pages_PPageImages_thumbnail]> = Spread<A>;
+interface QPPPIProp {};
+export interface Query_Pages_PPageImages_name extends QPPPIProp{pageimage: string};
+interface PageImage_Info {
+  source: string,
+  width: number,
+  height: number
+}
+export interface Query_Pages_PPageImages_thumbnail extends QPPPIProp{thumbnail: PageImage_Info};
+export interface Query_Pages_PPageImages_original extends QPPPIProp{original: PageImage_Info};
+
+export interface Query_ONamespace {
+  id: number,
+  case: string,
+  name: string,
+  subpages: boolean,
+  canonical: string,
+  content: boolean,
+  nonincludable: boolean
+}
+export type Query_MSiteInfo_namespace = ({namespaces: Record<string, Query_ONamespace>});
+export type Query_Pages_PArticleSnippet = ({extract: string});
+export type Query_LAllPages = ({
+  allpages: Query_OPage[]
+})
+
+export type Query<A extends readonly [...any]> = ({ query: Spread<A> });
+
+
+
+
+
+
+
+
+export type Parse_PDisplayTitle = ({displaytitle: string});
+
+
+
+
+export type Parse_Obj = ({title: string; pageid: number});
+export type Parse<A extends readonly [...any]> = ({ parse: Spread<[Parse_Obj, ...A]> });

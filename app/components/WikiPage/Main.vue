@@ -4,7 +4,7 @@
     <template #top>
       <slot name="top"></slot>
     </template>
-    <template #header>
+    <template #headers>
       <template v-if="!page.startsWith('User:')">
         <div class="page-header__categories" v-if="data.parse.categories.length != 0">
           <span class="page-header__categories-in">in: </span>
