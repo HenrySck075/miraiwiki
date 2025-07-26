@@ -2,7 +2,7 @@
   <div class="px-3 mx-auto" style="max-width: var(--f-max-width);" v-if="data">
     <DiscussionPost :data="data">
       <template #header>
-        <UButton class="!mx-0" variant="link" color="neutral" to="../" icon="material-symbols:arrow-left-alt-rounded">
+        <UButton class="!mx-0" variant="link" color="neutral" to="../" icon="mdi:arrow-left">
           All Posts
         </UButton>
       </template>

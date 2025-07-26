@@ -738,13 +738,6 @@
     "@floating-ui/utils" "^0.2.10"
     vue-demi ">=0.13.0"
 
-"@iconify-json/material-symbols@^1.2.30":
-  version "1.2.30"
-  resolved "https://registry.yarnpkg.com/@iconify-json/material-symbols/-/material-symbols-1.2.30.tgz#539c3a7d2fa0b62b41870a4a33467ec76656cb8f"
-  integrity sha512-3dA1jxkCd8LqEaAWjwQ5tob4pJNKE59Bz604AL1GP3Kyv//pR3un3cIyAUWOFQS1lz0vKKkn0BKOCmcUDi1G8A==
-  dependencies:
-    "@iconify/types" "*"
-
 "@iconify/collections@^1.0.563":
   version "1.0.567"
   resolved "https://registry.npmjs.org/@iconify/collections/-/collections-1.0.567.tgz"

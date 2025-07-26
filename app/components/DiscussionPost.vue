@@ -41,7 +41,7 @@
       </div>
     </div>
     <span class="inline-block space-x-2" v-if="data.tags.length!=0">
-      <UIcon name="material-symbols:label-rounded"></UIcon>
+      <UIcon name="mdi:label"></UIcon>
       <span class="inline-block">
         <template v-for="(tag, idx) in data.tags">
           <span v-if="idx!=0">, </span>
@@ -50,8 +50,8 @@
       </span>
     </span>
     <div class="flex flex-row space-x-4">
-      <UButton class="!px-0" icon="material-symbols:favorite-outline" color="neutral" variant="link">{{ data.upvoteCount }}</UButton>
-      <UButton class="!px-0" icon="material-symbols:chat-bubble-outline-rounded" color="neutral" variant="link">{{ data.postCount }}</UButton>
+      <UButton class="!px-0" icon="mdi:favorite-outline" color="neutral" variant="link">{{ data.upvoteCount }}</UButton>
+      <UButton class="!px-0" icon="mdi:chat-bubble-outline" color="neutral" variant="link">{{ data.postCount }}</UButton>
     </div>
     <slot name="content"></slot>
   </div>

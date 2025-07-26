@@ -1,10 +1,10 @@
 <template>
   <div>
     <div class="inline-flex space-x-2 rounded-lg overflow-hidden bg-default ring ring-default w-full" style="align-items: center;">
-      <UButton @click="playAudio" :icon="paused ? 'material-symbols:play-arrow-rounded' : 'material-symbols:pause'" color="neutral" variant="ghost" />
+      <UButton @click="playAudio" :icon="paused ? 'mdi:play-arrow' : 'mdi:pause'" color="neutral" variant="ghost" />
       <USlider v-model="playProg"></USlider>
       <span style="white-space: nowrap;">{{ current }} / {{ duration }}</span>
-      <UButton :icon="muted ? 'material-symbols:volume-off-rounded' : 'material-symbols:volume-up-rounded'" @click="muted = !muted" color="neutral" variant="ghost" />
+      <UButton :icon="muted ? 'mdi:volume-off' : 'mdi:volume-up'" @click="muted = !muted" color="neutral" variant="ghost" />
       <USlider v-model="volume" class="w-md"></USlider>
     </div>
     <audio :src="audioSrc" style="display:none" ref="balls"></audio>

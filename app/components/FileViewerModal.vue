@@ -50,7 +50,7 @@ const imgAuthor: string = await useFetch(`/api/${site}/query`, {
         </span>
       </div>
       <div class="flex-1"></div>
-      <UButton icon="material-symbols:close" color="neutral" variant="ghost" @click="emit('close')"></UButton>
+      <UButton icon="mdi:close" color="neutral" variant="ghost" @click="emit('close')"></UButton>
     </template>
     <template #body>
       <!--pretend its an image file for now-->

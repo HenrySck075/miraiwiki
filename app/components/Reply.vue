@@ -1,6 +1,6 @@
 <template>
-  <div class="inline-flex space-x-4">
-    <div class="w-1 bg-default"></div>
+  <div class="inline-flex">
+    <div class="w-1 bg-default !mr-4"></div>
     <CommentBase :data="data" class="!bg-default"></CommentBase>
   </div>
 </template>

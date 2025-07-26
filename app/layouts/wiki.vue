@@ -9,11 +9,11 @@
         </UDropdownMenu>
       </template>
       <div style="flex-grow: 1"></div>
+      <UButton icon="mdi:github" to="https://github.com/HenrySck075/fancybreeze" variant="ghost" color="neutral" title="Source code"></UButton>
       <Search>
       </Search>
       <UDropdownMenu :items="themeItems">
-        <UButton :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral">
-        </UButton>
+        <UButton :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
       </UDropdownMenu>
     </div>
     <div id="fancybreeze-content" class="overflow-y-scroll">
@@ -42,8 +42,8 @@ type mope = {
 
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 const themeItems = [
-  { label: "Light", icon: "material-symbols:light-mode-rounded", onSelect: () => { currentTheme.value = "Light"; } },
-  { label: "Dark", icon: "material-symbols:dark-mode-rounded", onSelect: () => { currentTheme.value = "Dark"; } },
+  { label: "Light", icon: "mdi:white-balance-sunny", onSelect: () => { currentTheme.value = "Light"; } },
+  { label: "Dark", icon: "mdi:weather-night", onSelect: () => { currentTheme.value = "Dark"; } },
   //{label: "System"}
 ]
 const route = useRoute();
@@ -96,12 +96,12 @@ const headers = await useFetch(
       children: [
         {
           label: "Main Page",
-          icon: "material-symbols:other-houses-outline",
+          icon: "mdi:other-houses-outline",
           to: "/"+route.params.site
         },
         {
           label: "Discuss",
-          icon: "material-symbols:forum-outline",
+          icon: "mdi:forum-outline",
           to: `/${route.params.site}/f`
         },
         {

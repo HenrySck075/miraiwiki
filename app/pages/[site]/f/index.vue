@@ -3,7 +3,7 @@
     <!--TODO: uhh maybe move welcome container to the left on widescreen-->
     <div class="flex flex-row mb-2" style="grid-area: main">
       <UPopover mode="hover">
-        <UButton trailing-icon="material-symbols:keyboard-arrow-down-rounded">Categories</UButton>
+        <UButton trailing-icon="mdi:keyboard-arrow-down">Categories</UButton>
         <template #content>
           <div class="max-h-96 overflow-x-hidden overflow-y-scroll">
             <div class="flex flex-col">

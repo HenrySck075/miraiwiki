@@ -1,5 +1,5 @@
 <template>
-  <UButton icon="material-symbols:search-rounded" variant="ghost" color="neutral" v-if="!open" @click="open=true"/>
+  <UButton icon="mdi:search" variant="ghost" color="neutral" v-if="!open" @click="open=true"/>
 
   <div class="w-1/4" v-else>
     <UInputMenu :arrow="false" v-model:search-term="query" v-model="m" :items="items" value-key="label" class="w-full"></UInputMenu>
