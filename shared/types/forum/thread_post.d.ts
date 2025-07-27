@@ -1,7 +1,7 @@
 import type { Timestamp, User } from "../wikia";
 import type { Attachments } from "../wikia_doc";
 
-interface ThreadPost {
+export interface ThreadPost {
   _links: {
     permalink: {
       href: string;

@@ -96,7 +96,7 @@ const headers = await useFetch(
       children: [
         {
           label: "Main Page",
-          icon: "mdi:other-houses-outline",
+          icon: "mdi:home",
           to: "/"+route.params.site
         },
         {

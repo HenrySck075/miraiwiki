@@ -192,3 +192,10 @@ onMounted(() => {
   }
 })
 </script>
+
+<style>
+div#toc.toc ul {
+  list-style-type: none !important;
+  margin: 0 !important;
+}
+</style>

@@ -1,15 +1,17 @@
 <template>
   <div class="space-y-1" v-once>
     <template v-for="line in content.content">
-      <p v-if="line.type === 'paragraph' && line.content">
-        <template v-for="e in line.content">
+      <p v-if="line.type === 'paragraph'">
+        <template v-for="e in line.content" v-if="line.content">
           <component 
-          :is="e.marks ? ULink : 'span'" 
-          :to="e.marks?.[0]?.attrs.href" 
+          :is="e.marks?.find((e)=>e.type=='link') ? ULink : 'span'" 
+          :to="e.marks?.find((e)=>e.type=='link')?.attrs.href"
+          :style="e.marks?.find((e)=>e.type=='strong') ? 'font-weight: bold' : ''"
           >
             {{ e.text }}
           </component>
         </template>
+        <br v-else>
       </p>
       <img :src="attachments.contentImages[line.attrs.id]!.url" v-else-if="line.type === 'image'">
       <a :href="attachments.openGraphs[line.attrs.id]!.url" v-else-if="line.type === 'openGraph'">
@@ -29,6 +31,7 @@ defineProps<{
   content: DocModel,
   attachments: Attachment
 }>();
+
 </script>
 
 

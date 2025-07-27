@@ -68,7 +68,6 @@ export default defineEventHandler(async (e) => {
     const headers = {headers: {
         cookie: `theme=${theme}; leftPaneOpen=0;`
     }}
-    e.node.res.setHeader("content-type", "text/css")
     if (wiki) {
         let css: string = ""
         if (type === "main") {
@@ -77,37 +76,48 @@ export default defineEventHandler(async (e) => {
                 headers
             );
             css = css.replaceAll("background-color:var(--theme-body-background-color);", "").replace('table.diff [class*="mw-diff-inline-"]{ins{background:var(--theme-success-color)}del{background:var(--theme-alert-color)}}', "");
-            
+            e.node.res.setHeader("content-type", "text/css")
         } else if (type === "wikiTheme") {
-            css = await $fetch(`https://${wiki}.fandom.com/load.php?mode=articles&articles=MediaWiki:Themes.css&only=styles`)
+            css = await $fetch(`https://${wiki}.fandom.com/load.php?mode=articles&articles=MediaWiki:Themes.css&only=styles`) /// TODO: remove as its loaded with site.styles
+            e.node.res.setHeader("content-type", "text/css")
         } else if (type === "category") {
             css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=ext.fandom.CategoryPage.category-layout-selector.css%7Cext.fandom.CategoryPage.category-page3.css&only=styles&skin=fandomdesktop`, headers)
+            e.node.res.setHeader("content-type", "text/css")
         } else if (type === "themeVars") {
             css = await $fetch(`https://${wiki}.fandom.com/wikia.php?controller=ThemeApi&method=themeVariables&variant=${theme}`, headers)
+            e.node.res.setHeader("content-type", "text/css")
         }
         else {
-            const modules = getQuery(e)["modules"] as string;
-            if (modules) {
-                css = await $fetch(`https://${wiki}.fandom.com/load.php?lang=en&modules=${modules}${modules.includes('.js') ? '' : '&only=styles'}&skin=fandomdesktop`, headers)
-                if (modules.includes(".js")) {
-                    e.node.res.setHeader("content-type", "text/javascript");
-                    return css;
-                }
-            } else {
-                /// return 404
-                e.node.res.statusCode = 404;
-                e.node.res.end("what (allowed types are 'main' and 'wikiTheme')");
+            const query = Object.assign({
+                "only": "styles"
+            }, getQuery(e));
+            delete query["variant"];
+            const queryStr = Object.keys(query).map((key) => `${key}=${query[key]}`).join("&");
+            const data = await $fetch.raw(`https://${wiki}.fandom.com/load.php?lang=en&${queryStr}`, headers);
+            css = data._data as string;
+            /// copies all file-related headers over
+            for (const key of ['content-type', 'content-length'] /*data.headers.keys().filter((e)=>!(e.startsWith('x-') || ['set-cookie', 'access-control-allow-origin', 'strict-transport-security'].includes(e)))*/) {
+                e.node.res.setHeader(key, data.headers.get(key)!);
             }
         }
+
+        // convert the import directives into one single format of @import url("url");
+        css =
+        // 1. @import url(urlUnquoted)
+        css.replaceAll(/@import\s+url\(([^"]+?)\);/g, '@import url("$1");')
+        // 2. @import "url"
+        .replaceAll(/@import\s+"([^"]+?)";/g, '@import url("$1");')
+
+        // remove all import rules from the css and store them somewhere
+        let importRules: string[] = [];
+        css = css.replace(/@import\s+url\(([^)]+?)\);/g, (match, url) => {
+            importRules.push(match);
+            return '';
+        });
             
         const cssTree = cssParser.parse(css);
         const rules = cssTree.stylesheet!.rules;
 
-        rules.sort((a,b)=>{
-            if (b.type === "import") return 1;
-            if (a.type === "import") return -1;
-            return 0;
-        })
         if (type === "main") {
             // and delete height, margin-bottom, position, transform from those rules
             // of course it is not sequentially next to each other
@@ -144,7 +154,13 @@ export default defineEventHandler(async (e) => {
         for (const domain of assetsDomains) {
             css = css.replaceAll(domain, `/api/assets/${domain.substring(8)}`)
         }
-        css = css
+        const imports = importRules.map((e)=>{
+            /// replace urls that has the /load.php path (aka url string startsWith /load.php) to /api/wikiassets/${wiki}/style
+            if (e.startsWith('@import url("/load.php')) {
+                return `@import url("/api/wikiassets/${wiki}/style?`+e.substring(e.indexOf("/load.php") + 10);
+            }
+        }).join("\n").trim();
+        css = imports + (imports.length == 0 ? '' : "\n") + css
             .replaceAll("/wiki/Special:FilePath", `/api/wikiassets/${wiki}/filepath`)
             .replaceAll("/load.php", `https://${wiki}.fandom.com/load.php`)
         return css

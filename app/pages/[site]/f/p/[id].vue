@@ -8,8 +8,9 @@
       </template>
       <template #content>
         <div class="flex flex-col !space-y-2 !mt-2"
-          v-if="data._embedded['doc:posts'] && data._embedded['doc:posts'].length != 0">
-          <template v-for="reply in data._embedded['doc:posts'].toSorted((a, b) => a.position - b.position)">
+          v-if="posts && posts.length != 0">
+          <UButton @click="query" v-if="prev != null" loading-auto>Older posts</UButton>
+          <template v-for="reply in posts.toSorted((a, b) => a.position - b.position)">
             <Reply :data="threadPostAsPost(reply)"></Reply>
           </template>
         </div>
@@ -22,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ThreadExtra } from '~~/shared/types/forum/thread';
+import type { Thread, ThreadExtra } from '~~/shared/types/forum/thread';
 import type { ThreadPost } from '~~/shared/types/forum/thread_post';
 import type { Post } from '~~/shared/types/post';
 
@@ -49,21 +50,52 @@ function threadPostAsPost(tp: ThreadPost): Post {
   }
 }
 const route = useRoute();
-const { data } = await useFetch<ThreadExtra>(
-  `/api/${route.params.site}/DiscussionThread/getThread`,
-  {
-    query: {
-      "threadId": route.params.id,
-      "responseGroup": "full",
-      "sortDirection": "descending",
-      "sortKey": "creation_date",
-      "viewableOnly": "false"
+const posts = ref<ThreadPost[]>([]);
+
+let prev = ref<string | null>("");
+
+let author = "";
+let title = "";
+
+let data: globalThis.Ref<ThreadExtra | undefined, ThreadExtra | undefined> | null = null;
+async function query() {
+  console.log(prev.value != null && prev.value?.length == 0);
+  data = ((prev.value != null && prev.value?.length == 0) ? await useFetch<ThreadExtra>(
+    `/api/${route.params.site}/DiscussionThread/getThread`,
+    {
+      query: {
+        "threadId": route.params.id,
+        "responseGroup": "full",
+        "sortDirection": "descending",
+        "sortKey": "creation_date",
+        "viewableOnly": "false"
+      }
     }
+  ) : await useFetch<ThreadExtra>(prev.value!)).data;
+  posts.value.unshift(...data.value!._embedded['doc:posts']);
+  author = data.value!.createdBy.name;
+  title = data.value!.title;
+  console.log(data.value!._links);
+  prev.value = data.value!._links.next?.[0]?.href ?? null;
+  if (prev.value) {
+    let u = URL.parse(prev.value)!;
+    let c = useRequestURL();
+    u.host = c.host;
+    u.protocol = c.protocol;
+    u.pathname = `/api/${route.params.site}/DiscussionThread/getThread`
+    u.searchParams.delete('controller');
+    u.searchParams.delete('method');
+
+    prev.value = u.toString();
+
+    console.log(prev.value);
   }
-)
+}  
+
+await query();
 
 useSeoMeta({
-  title: ()=>`From ${data.value?.createdBy.name}: ${data.value?.title} | FancyBreeze`
+  title: ()=>`From ${author}: ${title} | FancyBreeze`
 })
 //console.log(data.value?._embedded['doc:posts']?.[0]?._embedded)
 </script>

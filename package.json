@@ -22,6 +22,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@iconify-json/mdi": "^1.2.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/css": "^0.0.38"
   }

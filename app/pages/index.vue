@@ -9,7 +9,7 @@
     <h2>FancyBreeze makes wiki pages on Fandom readable</h2>
     It removes ads, videos, and suggested content, leaving you with a clean page that doesn't slow down your device or use up your data, hopefully. <br>
     To use FancyBreeze, as of now there's a little bit of work to set up compared to BreezeWiki:
-    <ul>
+    <ul class="list-disc">
       <li>Download the source code <a href="https://github.com/HenrySck075/fancybreeze">here</a></li>
       <li>Install the dependencies using any of Node.js' package managers</li>
       <li>Run the server. It will be available on localhost:3000 on the default configuration.</li>
@@ -52,8 +52,5 @@ h1 {
 }
 h2 {
   @apply text-2xl;
-}
-li {
-  list-style-type: circle;
 }
 </style>

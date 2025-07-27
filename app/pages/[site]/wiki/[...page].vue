@@ -206,6 +206,7 @@ let redirectUrl: string;
 if (!indieVersion) {
 
   sheets = ref([
+    //`/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=site.styles`,
     `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=main`,
     `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=wikiTheme`,
     `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=themeVars`,

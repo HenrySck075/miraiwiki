@@ -36,7 +36,15 @@ export interface Poll {
   userVotes: number[] | null; 
 }
 
+interface href {
+  href: string;
+}
 interface ThreadInternal {
+  _links: {
+    first: href[],
+    next?: href[],
+    previous?: href[]
+  },
   createdBy: User;
   creationDate: Timestamp;
   firstPostId: string;
