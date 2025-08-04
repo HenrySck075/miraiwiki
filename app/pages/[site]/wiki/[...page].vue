@@ -6,7 +6,7 @@
           <link rel="stylesheet" v-bind:href="sheet">
         </template>
       </div>
-      <div :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop`">
+      <div :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop ooui-theme-fandomooui`">
         <div class="main-container m-auto">
           <div class="fandom-community-header__background cover fullScreen"
             style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
@@ -16,15 +16,21 @@
             <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"
               style="margin-top: 8px" ref="commentsNode" v-if="['Main'].includes(getPageNamespace(page))">
               <template v-if="comments">
-                <span class="font-bold">
-                  {{ comments.totalCount }} comments
-                </span>
-                <template v-for="cmt in comments.threads">
-                  <Comment :data="cmt"></Comment>
-                </template>
+                <div class="flex flex-row">
+                  <span class="font-bold">
+                    {{ comments.totalCount }} comments
+                  </span>
+                  <div class="flex-1"></div>
+                  <UButton color="neutral" @click="commentToggled = !commentToggled">{{commentToggled ? 'Hide' : 'Show'}}</UButton>
+                </div>
+                <div :style="commentToggled ? '' : 'display: none'">
+                  <template v-for="cmt in comments.threads">
+                    <Comment :data="cmt"></Comment>
+                  </template>
+                </div>
               </template>
             </div>
-            <div class="h-96"></div>
+            <Footer></Footer>
           </div>
         </div>
       </div>
@@ -46,7 +52,7 @@
       </p>
 
       <UButton :to="redirectUrl" target="_blank" icon="i-heroicons-arrow-top-right-on-square" size="lg">
-        Go to the New Wiki!
+        Beam me up
       </UButton>
 
       <template #footer>
@@ -64,6 +70,7 @@ import type { Comment as WikiaComment } from '~~/shared/types/comment';
 import { WikiPageCategory, WikiPageMain, WikiPageSpecial, WikiPageUser } from '#components';
 import type { ShallowRef } from 'vue';
 import type { APIResponse, Parse, Parse_PDisplayTitle, Query_Pages_PPageImages, Query_Pages_PArticleSnippet, Query_Pages_PPageImages_thumbnail } from '~~/shared/types/actionapi';
+
 
 function pageComponentForNamespace(ns: string): any {
   return (
@@ -208,6 +215,7 @@ type beef = ({
 });
 let comments: Ref<beef | null>;
 let redirectUrl: string;
+let commentToggled = ref(false);
 if (!indieVersion) {
   sheets = ref([
     //`/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=site.styles`,
@@ -224,7 +232,8 @@ if (!indieVersion) {
     //
   });
   comments = ref(null);
-  isCommentsVisible = useElementVisibility(useTemplateRef("commentsNode"));
+  const commentsNode = useTemplateRef("commentsNode")
+  isCommentsVisible = useElementVisibility(commentsNode);
   watch(isCommentsVisible, async (e) => {
     if (e && comments.value == null) {
       comments.value = (await useFetch<beef>(`/api/${site}/ArticleCommentsController/getComments`, {

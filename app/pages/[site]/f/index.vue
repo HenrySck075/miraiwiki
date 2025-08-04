@@ -2,13 +2,13 @@
   <div class="px-3 mx-auto" style="max-width: var(--f-max-width);" v-if="data">
     <!--TODO: uhh maybe move welcome container to the left on widescreen-->
     <div class="flex flex-row mb-2" style="grid-area: main">
-      <UPopover mode="hover">
+      <UPopover mode="hover" v-model:open="popoverState">
         <UButton trailing-icon="mdi:keyboard-arrow-down">Categories</UButton>
         <template #content>
           <div class="max-h-96 overflow-x-hidden overflow-y-scroll">
             <div class="flex flex-col">
-              <template v-for="forum in data._embedded.forums.toSorted((a,b)=>threadCountOf(b)-threadCountOf(a))">
-                <UButton color="neutral" variant="ghost">
+              <template v-for="forum in forums">
+                <UButton color="neutral" variant="ghost" @click="setCurrentThread(forum.id)">
                   <div class="flex flex-col" style="text-align: left;">
                     <span>{{ forum.name == "Root Forum" ? "All" : forum.name }}</span>
                     <span class="text-gray-400">
@@ -117,7 +117,7 @@ import type { Forum } from '~~/shared/types/forum/forum';
 import type { DiscussionThreads } from '~~/shared/types/forum/resp';
 import type { Thread } from '~~/shared/types/forum/thread';
 import { convertAssetsURL, relativeTimeOf } from '~~/shared/utils/utils';
-
+const popoverState = ref(false);
 const route = useRoute();
 function threadCountOf(forum: Forum) {
   return forum.name == "Root Forum" ? data.value!.threadCount : forum.threadCount;
@@ -131,6 +131,7 @@ definePageMeta({
 
 const threads= ref<Thread[]>([])
 const data = ref<DiscussionThreads>();
+const forumId = ref(useRoute().query["catId"] as string ?? "");
 let nextThreadsUrl: string | null = "https://love-live.fandom.com/wikia.php?controller=DiscussionThread&method=getThreads&responseGroup=small&sortDirection=descending&sortKey=trending&viewableOnly=true&limit=20&page=0";
 
 async function fetchThreads() {
@@ -140,6 +141,9 @@ async function fetchThreads() {
   const method = params.get("method")!;
   params.delete("controller");
   params.delete("method");
+  if (forumId.value !== "") {
+    params.append("forumId", forumId.value);
+  }
   const q = await useFetch<DiscussionThreads>(
     `/api/${route.params.site}/${ctrl}/${method}?${params.toString()}`
   ).then((d)=>{
@@ -151,6 +155,23 @@ async function fetchThreads() {
   if (data.value === undefined) data.value = q;
 }
 await fetchThreads();
+
+const banger = useRouter();
+function setCurrentThread(id: string) {
+  forumId.value = id;
+  popoverState.value = false;
+  banger.push({
+    query: {
+      "catId": id
+    }
+  })
+  threads.value = [];
+  return fetchThreads();
+}
+
+const forums = computed(()=>data.value!._embedded.forums.toSorted((a,b)=>threadCountOf(b)-threadCountOf(a)))
+
+
 const {data: feeds} = await useFetch<FeedsAndPosts>(`/api/${route.params.site}/FeedsAndPosts/getAll`)
 useSeoMeta({
   title: ()=>`Discuss everything about ${feeds.value?.wikiVariables.name} | FancyBreeze`

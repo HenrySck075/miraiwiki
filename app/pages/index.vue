@@ -32,6 +32,8 @@
     <p class="text-green-600">&gt;rabu raibu —GiIvaSunner</p>
     <p class="text-green-600">&gt;oh btw i moved my wiki go check it out on siivagunner.wiki —GiIvaSunner</p>
     <p class="text-green-600">&gt;I am now going to list some big names in the Geode SDK community who are actual frauds and lie directly to the community: -Cvolton: amogus —HJFod</p>
+    <p class="text-green-600">&gt;attempting to go to a wiki's forum page with fancybreeze works, which is ironic and unbased honestly —Not Tom Skeleton</p>
+    <Footer></Footer>
   </div>
 </template>
 
@@ -42,6 +44,14 @@ const pagename = ref("");
 function onClick2ah() {
   navigateTo(`${sitename.value}/wiki/${pagename.value}`);
 }
+
+useHead({
+  title: "About | FancyBreeze",
+});
+useSeoMeta({
+  title: "About | FancyBreeze",
+  description: "A decorated better world of fan wiki platform!"
+});
 </script>
 
 <style scoped>

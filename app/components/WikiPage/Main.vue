@@ -145,28 +145,55 @@ const { data: data } = await useFetch(
 
 const content = useTemplateRef("content");
 onMounted(() => {
+  if (import.meta.dev) {
+    const toast = useToast()
+  // todo: this reveals that nuxt in fact reloads the page again if i replace the wiki page as a redirect
+    toast.add({
+      title: "Hydration completed"
+    })
+  }
+
   //customElements.define("fancybreeze-audio", defineCustomElement(FAudio))
+
+  const amogus = useRouter();
 
   const contentNode = content.value!;
 
+  // tabber 2
+  if (location.hash) {
+    const hash = location.hash.replace(/^#/, "");
+    contentNode.querySelectorAll("div.wds-tabber").forEach(tabber => {
+      const tabs = tabber.querySelectorAll(".wds-tabs__wrapper > .wds-tabs > li");
+      tabs.forEach((tab, idx) => {
+        if ((tab as HTMLLIElement).dataset["hash"] === hash) {
+          // Set tab button as current
+          tabs.forEach((t, i) => {
+            t.classList.toggle("wds-is-current", i === idx);
+          });
+          // Set tab content as current
+          tabber.querySelectorAll(".wds-tab__content").forEach((content, i) => {
+            content.classList.toggle("wds-is-current", i === idx);
+          });
+        }
+      });
+    });
+  }
+
+  // tabber
   contentNode.querySelectorAll("div.wds-tabber").forEach(e => e.querySelectorAll(".wds-tabs__wrapper > .wds-tabs > li").forEach((elem, idx) => {
     elem.addEventListener("click", (e) => {
+      amogus.replace({
+        // this is dangerous
+        hash: "#" + (elem as HTMLLIElement).dataset["hash"]
+      })
       // remove .wds-is-current from all .wds-tab__content
       // and add it back to the content corresponds to the index
       elem.closest(".wds-tabber")?.querySelectorAll(".wds-tab__content").forEach((tabContent, i) => {
-        if (i === idx) {
-          tabContent.classList.add("wds-is-current");
-        } else {
-          tabContent.classList.remove("wds-is-current");
-        }
+        tabContent.classList.toggle("wds-is-current", i === idx);
       });
       // do the same to the tab buttons
       elem.closest(".wds-tabs")?.querySelectorAll("li").forEach((tabButton, i) => {
-        if (i === idx) {
-          tabButton.classList.add("wds-is-current");
-        } else {
-          tabButton.classList.remove("wds-is-current");
-        }
+        tabButton.classList.toggle("wds-is-current", i === idx);
       });
     });
   }))
@@ -176,7 +203,7 @@ onMounted(() => {
     if (elem.href && !elem.href.startsWith("#")) {
       elem.addEventListener("click", (e) => {
         e.preventDefault();
-        navigateTo(elem.href.replace(location.origin, ""));
+        navigateTo(elem.href.replace(location.origin, ""), {external: !elem.href.includes(location.origin)});
       });
     }
   });

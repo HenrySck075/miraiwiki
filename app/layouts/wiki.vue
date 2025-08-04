@@ -65,7 +65,7 @@ const headers = await useFetch(
       /// obvious
       const isPlainLink = match[1]!.includes('<span class="plainlinks">')
       /// 
-      const page = (match[1]!.includes('|') ? match[1]!.substring(0, match[1]!.indexOf('|')) : match[1]!).trim();
+      const page = (match[1]!.includes('|') ? match[1]!.substring(0, match[1]!.indexOf('|')) : match[1]!).trim().replaceAll(" ", "_");
       /// the item's display label
       let label = (match[1]!.includes('|') ? match[1]!.substring(match[1]!.indexOf('|') + 1) : match[1]!).trim();
       if (label.includes("<")) label = cheerioLoad(label, {}, false)("*").text();
