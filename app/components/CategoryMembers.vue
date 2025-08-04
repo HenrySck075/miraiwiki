@@ -1,7 +1,8 @@
 <template>
-  <div>
+  <div style="border-top: 1px solid var(--theme-border-color); padding-top: 4px;">
     <link rel="stylesheet"
       :href="`/api/wikiassets/${route.params.site}/style?variant=${theme.toLowerCase()}&type=category`">
+    <span>The following {{ resp.query.pages.length }} entries are in this category, out of {{ catinfo.query.pages[0]!.categoryinfo.size }} entries total</span>
     <div class="category-page__members">
       <div class="category-page__members-wrapper" v-for="(group, char) in groupedMembers">
         <div class="category-page__first-char">{{ char }}</div>
@@ -44,18 +45,30 @@ const { data: resp } = useWikiFetch<APIResponse<[
 ]>>('/query', {
   query: {
     "generator": "categorymembers",
-    "gcmtitle": encodeURI(page),
-    "gcmlimit": "max", /// sorting problem
+    "gcmtitle": page,
+    "gcmlimit": "200", /// sorting problem
     "gcmprop": "title",
     "prop": "pageimages",
     "piprop": "thumbnail"
+  }
+})
+const {data:catinfo} = useWikiFetch<APIResponse<[
+  Query<[
+    Query_Pages<[
+      Query_Pages_PCategoryInfo
+    ]>
+  ]>
+]>>('/query', {
+  query: {
+    "prop": "categoryinfo",
+    "titles": page,
   }
 })
 
 const theme = useCookie("theme", { default: () => "Dark" });
 
 import { computed } from 'vue';
-import type { APIResponse, Query, Query_OPage, Query_Pages, Query_Pages_PPageImages, Query_Pages_PPageImages_thumbnail } from '~~/shared/types/actionapi';
+import type { APIResponse, Query, Query_OPage, Query_Pages, Query_Pages_PCategoryInfo, Query_Pages_PPageImages, Query_Pages_PPageImages_thumbnail } from '~~/shared/types/actionapi';
 import type { Spread } from '~~/shared/types/objmerger';
 const groupedMembers = computed(() => {
   if (!resp.value) return {};

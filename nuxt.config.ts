@@ -6,6 +6,9 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxt/image',
   ],
+  experimental: {
+    asyncContext: true
+  },
   /*
   nitro: {
     experimental: {

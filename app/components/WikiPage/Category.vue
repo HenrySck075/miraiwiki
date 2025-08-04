@@ -1,7 +1,7 @@
 <template>
   <WikiPageMain :site="site" :page="page" :sheets="sheets" @sheet-add="['onUpdate:sheets']"> <!--the fuck-->
-    <template #top>
-      <UserInfo :site="site" :user="removePrefix(page, 'User:')"></UserInfo>
+    <template #footer>
+      <CategoryMembers v-if="page.startsWith('Category:')" /> <!--Category page-->
     </template>
   </WikiPageMain>
 </template>

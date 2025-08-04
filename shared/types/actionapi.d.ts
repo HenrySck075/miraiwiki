@@ -2,6 +2,7 @@ import type { Spread } from "./objmerger";
 
 interface APIResponseBase {
   batchcomplete: boolean;
+  continue?: Record<string, string>;
 }
 
 export type APIResponse<A extends readonly [...any]> = Spread<[APIResponseBase, ...A]>;
@@ -251,6 +252,15 @@ interface PageImage_Info {
 export interface Query_Pages_PPageImages_thumbnail extends QPPPIProp{thumbnail: PageImage_Info};
 export interface Query_Pages_PPageImages_original extends QPPPIProp{original: PageImage_Info};
 
+export type Query_Pages_PCategoryInfo = {
+  "categoryinfo": {
+    "size": number,
+    "pages": number,
+    "files": number,
+    "subcats": number,
+    "hidden": boolean
+  }
+}
 export interface Query_ONamespace {
   id: number,
   case: string,

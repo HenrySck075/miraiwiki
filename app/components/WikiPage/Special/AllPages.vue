@@ -1,29 +1,37 @@
 <template>
   <WikiPageBase>
     <template #headers>
-      <WikiPageITitle page="Special:AllPages" display-title-html="All Pages" />
+      <WikiPageITitle page="Special:AllPages" display-title-html="All pages" />
     </template>
     <template #content>
-      <div class="border-2 rounded-2xl w-full">
-        <p>Display page starting at</p>
-        <UInput v-model="start" class="w-4/5"></UInput>
+      <div class="border-2 rounded-2xl w-4/5">
+        <p class="!m-0">Display page starting at</p>
+        <UInput v-model="start" class="w-full"></UInput>
         <br>
-        <p>...and ends at</p>
-        <UInput v-model="end" class="w-4/5"></UInput>
         <br>
-        <p>Namespace</p>
-        <USelectMenu v-model="nsId" :items="Object.values(namespaces)" value-key="id" label-key="name" class="w-4/5"></USelectMenu>
+        <p class="!m-0">...and ends at</p>
+        <UInput v-model="end" class="w-full"></UInput>
         <br>
-        <UButton @click="query">Go</UButton>
+        <br>
+        <p class="!m-0">Namespace</p>
+        <USelectMenu v-model="nsId" :items="Object.values(namespaces)" value-key="id" label-key="name" class="w-full"></USelectMenu>
+        <br>
+        <UButton @click="query" class="my-2">Go</UButton>
       </div> 
-      <div style="columns: 22rem 3; break-inside: avoid">
-        <ul class="list-disc" style="margin: 6px 0 18px 36px">
-          <template v-for="page in pages">
-            <li :class="page.isRedirect ? 'apredirect':''">
-              <ULink :title="page.title" :href="`/${route.params.site}/wiki/${page.page}`">{{ page.title }}</ULink>
-            </li>
-          </template>
-        </ul>
+      <UProgress v-if="queryExecuting"></UProgress>
+      <div v-else>
+        <WikiPageSpecialAllPagesNavigator :prev="prev" :next="next" :nav-prev="navPrev" :nav-next="navNext"></WikiPageSpecialAllPagesNavigator>
+        <div style="columns: 22rem 3; break-inside: avoid">
+          <ul class="list-disc" style="margin: 6px 0 18px 36px">
+            <template v-for="page in pages">
+              <li :class="page.isRedirect ? 'apredirect':''">
+                <ULink :title="page.title" :href="`/${route.params.site}/wiki/${page.page}`">{{ page.title }}</ULink>
+              </li>
+            </template>
+          </ul>
+        </div>
+        <!--goated name-->
+        <WikiPageSpecialAllPagesNavigator :prev="prev" :next="next" :nav-prev="navPrev" :nav-next="navNext"></WikiPageSpecialAllPagesNavigator>
       </div>
     </template>
   </WikiPageBase>
@@ -38,6 +46,19 @@ import type { APIResponse, Query, Query_LAllPages, Query_MSiteInfo_namespace } f
 const route = useRoute();
 const start = ref((route.query["from"] as string | null)?.replaceAll("+", "") ?? "");
 const end = ref((route.query["to"] as string | null)?.replaceAll("+", "") ?? "");
+const prev = ref("");
+const next = ref("");
+
+function navPrev() {
+  start.value = prev.value;
+  end.value = '';
+  return query();
+}
+function navNext() {
+  start.value = next.value;
+  end.value = '';
+  return query();
+}
 
 const nsId = ref(Number.parseInt((route.query["namespace"] as string | null) ?? "0"));
 
@@ -60,11 +81,24 @@ type pageinfo = {
 }
 const pages = ref<pageinfo[]>([]);
 
+const limit = 345;
+
+const queryExecuting = ref(false);
 async function query() {
+  queryExecuting.value = true;
+
+  // set the page query params
+  useRouter().push({
+    query: {
+      "from": start.value.trim().length > 0 ? start.value.replaceAll(" ", "+") : undefined,
+      "to": end.value.trim().length > 0 ? end.value.replaceAll(" ", "+") : undefined,
+      "namespace": nsId.value != 0 ? nsId.value.toString() : undefined
+    }
+  })
+
   const q: Record<string, string> = {
     "list": "allpages",
-    "apfilterredir": "nonredirects",
-    "aplimit": "390"
+    "aplimit": (limit+1).toString()
   };
   if (start.value.trim().length != 0) {
     q["apfrom"] = start.value.replaceAll(" ", "+");
@@ -102,17 +136,44 @@ async function query() {
       "isRedirect": false,
       "page": p.title.replaceAll(" ","_")
     }
-  }).concat(resR.value.query.allpages.map(p=>{
-    return {
-      "title": p.title,
-      "isRedirect": true,
-      "page": p.title.replaceAll(" ","_")
+  })
+  let idx = -1;
+  for (let i of resR.value.query.allpages) {
+    // find the index of the exact entry in pages
+    idx = pages.value.findIndex((c, idx2)=>idx2 > idx && c.title === i.title);
+    pages.value[idx]!.isRedirect = true;
+  }
+
+  // this isnt sorted in the same order as ascending...
+  prev.value = pages.value[0] ? (await useWikiFetch<
+    APIResponse<[
+      Query<[
+        Query_LAllPages
+      ]>
+    ]>
+  >("/query", {
+    query: {
+      "list": "allpages",
+      "apfrom": pages.value[0]!.title,
+      "aplimit": (limit+1).toString(),
+      "apdir": "descending"
     }
-  })).toSorted((a,b)=>a.title.localeCompare(b.title));
+  }).then((d)=>{
+    return d.data.value.query.allpages.length > 1 ? d.data.value.query.allpages[d.data.value.query.allpages.length-1]?.title ?? "" : "";
+  })) : "";
+  next.value = pages.value.length > limit ? pages.value.pop()!.title : "";
+  
+  queryExecuting.value = false;
+}
+
+if (import.meta.server) {
+  const bob = useWikiMeta();
+  useSeoMeta({
+    title: `All pages | ${bob.value.site} | FancyBreeze`
+  })
 }
 
 await query();
-
 </script>
 
 <style>

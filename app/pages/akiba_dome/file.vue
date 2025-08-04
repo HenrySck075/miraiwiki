@@ -4,7 +4,7 @@ import FileViewerModal from '~/components/FileViewerModal.vue';
 const overlay = useOverlay();
 const modal = overlay.create(FileViewerModal, {
     props: {
-        file: "LL-COUNTDOWN-01.jpg",
+        file: "【PREVIEW】AiScReam Debut Single \"Ai♡Scream!\"",
         site: "love-live"
     }
 })

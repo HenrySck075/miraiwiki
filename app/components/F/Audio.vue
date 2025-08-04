@@ -82,11 +82,11 @@
   onMounted(()=>{
     audioElem.value!.addEventListener("play", (e)=>{
       // somehow trigger a recompute
-      console.log('hi');
+      
       paused.value = false;
     })
     audioElem.value!.addEventListener("pause", (e)=>{
-      console.log('bye');
+      
       paused.value = true;
     })
     audioElem.value!.addEventListener("timeupdate", (e)=>{

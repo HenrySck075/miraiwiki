@@ -11,7 +11,7 @@
           <div class="fandom-community-header__background cover fullScreen"
             style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
           <div class="resizable-container">
-            <component :is="pageComponentForNamespace(getPageNamespace(page))" v-on:sheetAdd="sheets.push" :site="site"
+            <component :is="pageComponentForNamespace(getPageNamespace(page))" v-model:sheets="sheets" :site="site"
               :page="page"></component>
             <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"
               style="margin-top: 8px" ref="commentsNode" v-if="['Main'].includes(getPageNamespace(page))">
@@ -61,16 +61,17 @@ import * as cheerio from 'cheerio';
 import { useElementVisibility } from '@vueuse/core';
 import type { Comment as WikiaComment } from '~~/shared/types/comment';
 
-import { WikiPageMain, WikiPageSpecial, WikiPageUser } from '#components';
+import { WikiPageCategory, WikiPageMain, WikiPageSpecial, WikiPageUser } from '#components';
 import type { ShallowRef } from 'vue';
 import type { APIResponse, Parse, Parse_PDisplayTitle, Query_Pages_PPageImages, Query_Pages_PArticleSnippet, Query_Pages_PPageImages_thumbnail } from '~~/shared/types/actionapi';
 
 function pageComponentForNamespace(ns: string): any {
   return (
     ns === "Main" ? WikiPageMain :
-      ns === "User" ? WikiPageUser :
-        ns === "Special" ? WikiPageSpecial :
-          'div'
+    ns === "Category" ? WikiPageCategory :
+    ns === "User" ? WikiPageUser :
+    ns === "Special" ? WikiPageSpecial :
+    'div'
   )
 }
 
@@ -124,66 +125,70 @@ const displayTitle = getPageNamespace(page) !== "Special" ? cheerio.load((await 
     }
   }
 )).data.value.parse.displaytitle, null, false)("*").text() : "";
-if (import.meta.server) {
-  const url = useRequestURL().toString();
-  const { data: balls } = await useWikiFetch<APIResponse<[Query<[Query_Pages<[Query_Pages_PArticleSnippet, Query_Pages_PPageImages<[Query_Pages_PPageImages_thumbnail]>]>]>]>>(
-    "/query",
+const url = useRequestURL().toString();
+const { data: balls } = await useWikiFetch<APIResponse<[Query<[Query_Pages<[Query_Pages_PArticleSnippet, Query_Pages_PPageImages<[Query_Pages_PPageImages_thumbnail]>]>]>]>>(
+  "/query",
+  {
+    query: {
+      "prop": "articlesnippet|pageimages",
+      "piprop": "thumbnail",
+      "titles": page
+    }
+  }
+)
+const { data: meta } = await useFetch(`/api/${site}/meta`)
+useWikiMeta({
+  site: meta.value.sitename,
+  page: page
+});
+
+useHead({
+  link: [
     {
-      query: {
-        "prop": "articlesnippet|pageimages",
-        "piprop": "thumbnail",
-        "titles": page
-      }
-    }
-  )
-  const { data: meta } = await useFetch(`/api/${site}/meta`)
-  useHead({
-    link: [
-      {
-        rel: "icon",
-        type: 'image/x-icon',
-        href: meta.value["favicon"].replace("$wgUploadPath", `https://static.wikia.nocookie.net/${site}/images`)
-      },
-      {
-        rel: 'canonical',
-        href: url
-      },
-      {
-        rel: 'license',
-        /// tee hee
-        href: 'https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License'
-      }
-    ],
-    /// TODO: no mediawiki engine object we need to do this ourselves
-    /*
-    script: ()=>{
-      return includeWDSIcons ? [
-        {
-          src: `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=u:dev:MediaWiki:WDSIcons/code.js`
-        }
-      ] : []
-    }
-    */
-  })
-  useSeoMeta({
-    title: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`,
-    description: balls.value.query.pages[0]!.extract,
-    robots: {
-      maxImagePreview: "standard",
+      rel: "icon",
+      type: 'image/x-icon',
+      href: meta.value["favicon"].replace("$wgUploadPath", `https://static.wikia.nocookie.net/${site}/images`)
     },
-    twitterCard: "summary",
-    twitterDescription: balls.value.query.pages[0]!.extract,
-    twitterTitle: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`,
-    ogSiteName: meta.value.sitename,
-    ogType: "article",
-    ogTitle: displayTitle,
-    ogUrl: url,
-    ogDescription: balls.value.query.pages[0]!.extract,
-    ogImage: balls.value.query.pages[0]!.thumbnail.source,
-    formatDetection: "telephone=no",
-    generator: "MediaWiki 1.43.1", // not exactly i think
-  })
-}
+    {
+      rel: 'canonical',
+      href: url
+    },
+    {
+      rel: 'license',
+      /// tee hee
+      href: 'https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License'
+    }
+  ],
+  /// TODO: no mediawiki engine object we need to do this ourselves
+  /*
+  script: ()=>{
+    return includeWDSIcons ? [
+      {
+        src: `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=u:dev:MediaWiki:WDSIcons/code.js`
+      }
+    ] : []
+  }
+  */
+})
+
+useSeoMeta({
+  title: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`,
+  description: balls.value.query.pages[0]!.extract,
+  robots: {
+    maxImagePreview: "standard",
+  },
+  twitterCard: "summary",
+  twitterDescription: balls.value.query.pages[0]!.extract,
+  twitterTitle: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`,
+  ogSiteName: meta.value.sitename,
+  ogType: "article",
+  ogTitle: displayTitle,
+  ogUrl: url,
+  ogDescription: balls.value.query.pages[0]!.extract,
+  ogImage: balls.value.query.pages[0]?.thumbnail?.source,
+  formatDetection: "telephone=no",
+  generator: "MediaWiki 1.43.1", // not exactly i think
+})
 definePageMeta({
   //key: `wiki-${page}`,
   layout: "wiki",
@@ -204,7 +209,6 @@ type beef = ({
 let comments: Ref<beef | null>;
 let redirectUrl: string;
 if (!indieVersion) {
-
   sheets = ref([
     //`/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=site.styles`,
     `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=main`,
@@ -217,7 +221,7 @@ if (!indieVersion) {
     Array.prototype.filter.call(themeVarsSheet.value?.querySelectorAll("link[rel='stylesheet']"), (e) => e.href.includes("wikia.php") || e.href.includes("/api/wikiassets")).forEach(
       (v) => { v.href = v.href.replace(/variant=([a-z]*)/g, `variant=${currentTheme.value.toLowerCase()}`); }
     );
-    //console.log("Theme changed to: ", currentTheme.value);
+    //
   });
   comments = ref(null);
   isCommentsVisible = useElementVisibility(useTemplateRef("commentsNode"));

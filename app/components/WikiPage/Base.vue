@@ -7,7 +7,6 @@
     </div>
     <div id="content" class="page-content">
       <slot name="content"></slot>
-      <CategoryMembers v-if="page.startsWith('Category:')" /> <!--Category page-->
     </div>
   </div>
 </template>

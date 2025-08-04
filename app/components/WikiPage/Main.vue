@@ -47,6 +47,7 @@
     </template>
     <template #content>
       <div v-html="data.parse.text" ref="content"></div>
+      <slot name="footer"></slot>
     </template>
   </WikiPageBase>
 </template>
@@ -64,6 +65,8 @@ const emit = defineEmits<{
 }>();
 
 
+import { modal } from '#build/ui';
+import { FileViewerModal } from '#components';
 import * as cheerio from 'cheerio';
 import { Element as SElement } from 'domhandler';
 
@@ -99,30 +102,44 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
     }
   }
 }
+
+const sheets = defineModel<string[]>("sheets", {required: true});
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 const { data: data } = await useFetch(
   `/api/${site}/parse`,
   {
     query: {
       "page": page,
+      "redirects": true,
       "prop": "text|langlinks|categories|displaytitle|properties|parsewarnings",
     }
   }
 ).then((resp) => {
   const data = resp.data;
+  if (data.value.parse.title) {
+    useRouter().push("../wiki/"+data.value.parse.title.replaceAll(" ", "_"))
+  }
   // update the image srcs
   const $ = cheerio.load(data.value.parse.text);
   const doc = $("body > div").find("img, a, span, audio");
+  $('<button type="button" class="mw-collapsible-toggle mw-collapsible-toggle-default" aria-expanded="false" onclick="this.ariaExpanded = this.ariaExpanded === \'true\' ? \'false\' : \'true\'" tabindex="0"><span class="mw-collapsible-text"></span></button>')
+  .prependTo($("body > div div.mw-collapsible"));
   updateTree(doc);
-  
   const sliders = $("div.fandom-slider");
+  const extraSheets = [];
   if (sliders.length != 0) {
-    emit("sheetAdd", `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=ext.fandom.slider.css|ext.fandom.photoGallery.gallery.css`)
+    extraSheets.push('ext.fandom.slider.css')
     sliders.find(".fandom-slider__nav__caption div:first-child").addClass("fancybreeze-slider__caption-cur");
     //includeWDSIcons = true;
   }
+  if (sliders.length != 0 || $("div.wikia-gallery").length != 0) {
+    extraSheets.push('ext.fandom.photoGallery.gallery.css')
+  }
+  if (extraSheets.length != 0) {
+    sheets.value.push(`/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=${extraSheets.join("|")}`)
+  }
   data.value.parse.text = $("body > div").html();
-  //console.log(data);
+  //
   return { data: data };
 })
 
@@ -164,11 +181,13 @@ onMounted(() => {
     }
   });
 
+  // idk
   contentNode.querySelectorAll("audio.mw-file-element").forEach((v)=>{
     (v as HTMLAudioElement).style.minWidth = (v as HTMLAudioElement).style.width;
     (v as HTMLAudioElement).style.width = ""
   })
   
+  // gallery slider
   for (const slider of contentNode.querySelectorAll("div.fandom-slider")) {
     const sliderList: HTMLDivElement = slider.querySelector(".fandom-slider__list")!;
     const sliderCaptions = slider.querySelector(".fandom-slider__nav .fandom-slider__nav__caption")!;
@@ -190,6 +209,32 @@ onMounted(() => {
       sliderCaptions.querySelector(`div[data-index="${idx}"]`)!.classList.add("fancybreeze-slider__caption-cur")
     }, 8000)
   }
+
+  // file viewer modal handler
+  const overlay = useOverlay();
+  contentNode.querySelectorAll("figure[typeof^=\"mw:File\"], figure.pi-image, div.gallery-image-wrapper").forEach((elem) => {
+    let fileName = elem.querySelector("a > img[data-image-name]")?.getAttribute("data-image-name");
+    if (fileName === null) fileName = elem.querySelector("a > img[data-video-name]")?.getAttribute("data-video-name");
+    if (fileName) {
+      // disable anchor element from redirecting
+      const anchor = elem.querySelector("a");
+      if (anchor) {
+        anchor.addEventListener("click", (e) => {
+          e.preventDefault();
+        });
+      }
+
+      elem.addEventListener("click", () => {
+        const modal = overlay.create(FileViewerModal, {
+          props: {
+            file: fileName,
+            site: site
+          }
+        });
+        modal.open();
+      });
+    }
+  });
 })
 </script>
 
@@ -197,5 +242,26 @@ onMounted(() => {
 div#toc.toc ul {
   list-style-type: none !important;
   margin: 0 !important;
+}
+div#__nuxt.isolate #wiki_content figure[typeof^="mw:File"] > a,
+div#__nuxt.isolate #wiki_content figure.pi-image > a,
+div#__nuxt.isolate #wiki_content div.gallery-image-wrapper > a {
+  pointer-events:none;
+}
+
+button.mw-collapsible-toggle[aria-expanded=true] > span.mw-collapsible-text::before {
+  content: "Hide";
+}
+button.mw-collapsible-toggle[aria-expanded=false] > span.mw-collapsible-text::before {
+  content: "Show";
+}
+button.mw-collapsible-toggle::before {
+  content: "[";
+}
+button.mw-collapsible-toggle::after {
+  content: "]";
+}
+div.mw-collapsible:has(button.mw-collapsible-toggle[aria-expanded=false]) > div.mw-collapsible-content {
+  display: none;
 }
 </style>

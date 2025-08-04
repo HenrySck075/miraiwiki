@@ -59,7 +59,7 @@ let title = "";
 
 let data: globalThis.Ref<ThreadExtra | undefined, ThreadExtra | undefined> | null = null;
 async function query() {
-  console.log(prev.value != null && prev.value?.length == 0);
+  
   data = ((prev.value != null && prev.value?.length == 0) ? await useFetch<ThreadExtra>(
     `/api/${route.params.site}/DiscussionThread/getThread`,
     {
@@ -75,7 +75,7 @@ async function query() {
   posts.value.unshift(...data.value!._embedded['doc:posts']);
   author = data.value!.createdBy.name;
   title = data.value!.title;
-  console.log(data.value!._links);
+  
   prev.value = data.value!._links.next?.[0]?.href ?? null;
   if (prev.value) {
     let u = URL.parse(prev.value)!;
@@ -88,7 +88,7 @@ async function query() {
 
     prev.value = u.toString();
 
-    console.log(prev.value);
+    
   }
 }  
 
@@ -97,5 +97,5 @@ await query();
 useSeoMeta({
   title: ()=>`From ${author}: ${title} | FancyBreeze`
 })
-//console.log(data.value?._embedded['doc:posts']?.[0]?._embedded)
+//
 </script>
