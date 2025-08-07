@@ -9,9 +9,9 @@
           The following data is cached, and was last updated {{ new Date(data.query.querypage.cachedtimestamp).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'long', year: 'numeric' }) }}. A maximum of {{ data.query.querypage.maxresults.toLocaleString() }} results are available in the cache.
         </p>
         <p v-if="titleAndDesc[qppage]![1]">{{ titleAndDesc[qppage]![1] }}</p>
-        <p>Showing below up to <strong>{{limit}}</strong> results in range <strong>#{{Number.parseInt(data.query.querypage.results[0]!.value)+1}}</strong> to <strong>#{{Number.parseInt(data.query.querypage.results[data.query.querypage.results.length-1]!.value)+1}}</strong>.</p>
+        <p>Showing below up to <strong>{{limit}}</strong> results in range <strong>#{{offset+1}}</strong> to <strong>#{{offset+data.query.querypage.results.length}}</strong>.</p>
         <WikiPageSpecialQPBasedNavigator 
-          :results="data.query.querypage.results" :limit="limit" 
+          :results="data.query.querypage.results" :offset="offset" :limit="limit" 
           v-on="everybodyKnows"
         />
         <ol style="list-style-type: decimal; margin-left: 48px">
@@ -20,7 +20,7 @@
           </li>
         </ol>
         <WikiPageSpecialQPBasedNavigator 
-          :results="data.query.querypage.results" :limit="limit" 
+          :results="data.query.querypage.results" :offset="offset" :limit="limit" 
           v-on="everybodyKnows"
         />
       </div> 
@@ -157,11 +157,8 @@ data.value = await useWikiFetch<macaroni>("/query", {
   }
 }).then((v)=>v.data.value)
 
-
-if (import.meta.server) {
-  const bob = useWikiMeta();
-  useSeoMeta({
-    title: `${titleAndDesc[qppage]} | ${bob.value.site} | FancyBreeze`
-  })
-}
+const bob = useWikiMeta();
+useSeoMeta({
+  title: `${titleAndDesc[qppage]![0]} | ${bob.value.site} | FancyBreeze`
+})
 </script>

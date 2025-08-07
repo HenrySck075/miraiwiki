@@ -6,14 +6,18 @@
 </template>
 
 <script setup lang="ts">
-import { WikiPageSpecialAllPages, WikiPageSpecialSPList } from '#components';
+import { WikiPageSpecialAllPages, WikiPageSpecialRandom, WikiPageSpecialSPList } from '#components';
 
-const { page } = defineProps<{
+const { site, page } = defineProps<{
   site: string,
   page: string
 }>();
 
 const specialPage = removePrefix(page, "Special:").trim()
+
+if (specialPage === "ApiSandbox") {
+  await navigateTo(`https://${site}.fandom.com/wiki/Special:ApiSandbox`, {external: true});
+}
 
 /// meaning query pages are case-insensitive
 const qpPages = [
@@ -59,6 +63,7 @@ const qpPages = [
 function getComponentForSpecialPage() {
   return specialPage === "AllPages" ? WikiPageSpecialAllPages :
   specialPage === "SpecialPages" ? WikiPageSpecialSPList :
+  specialPage === "Random" ? WikiPageSpecialRandom :
     'div';
 }
 </script>

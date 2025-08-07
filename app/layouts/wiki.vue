@@ -59,15 +59,16 @@ const headers = await useFetch(
   const content: string = data.data.value["parse"]["wikitext"];
   function airth(str: string): mope[] {
     const ret = [];
-    for (const match of str.matchAll(/^\*([^*]+)\n((?:\*\*(?:[^\n]*)\n)*)/gm)) {
+    for (const match of str.matchAll(/^\*([^*]+)\n((?:\*\*(?:[^\n$]*)[\n$])*)/gm)) {
       /// Subitems declaration string
-      const cleanedSubDecl = match[2]!.replace(/^\*+/gm, (m) => m.slice(1)).trim();
+      /// (with a \n as a failsafe because i cant match eol in char classes sadge)
+      const cleanedSubDecl = match[2]!.replace(/^\*+/gm, (m) => m.slice(1)).trim()+"\n";
       /// obvious
       const isPlainLink = match[1]!.includes('<span class="plainlinks">')
       /// 
       const page = (match[1]!.includes('|') ? match[1]!.substring(0, match[1]!.indexOf('|')) : match[1]!).trim().replaceAll(" ", "_");
       /// the item's display label
-      let label = (match[1]!.includes('|') ? match[1]!.substring(match[1]!.indexOf('|') + 1) : match[1]!).trim();
+      let label = removePrefix((match[1]!.includes('|') ? match[1]!.substring(match[1]!.indexOf('|') + 1) : match[1]!).trim(), ":");
       if (label.includes("<")) label = cheerioLoad(label, {}, false)("*").text();
       /// the url for the item
       let dest: string;
@@ -83,8 +84,8 @@ const headers = await useFetch(
       }
       ret.push({
         "label": label,
-        "to": cleanedSubDecl.length != 0 ? "#" : dest,
-        "children": cleanedSubDecl.length != 0 ? (!isPlainLink ? [{label: label, to: dest, "class": "font-bold"}, ...airth(cleanedSubDecl)] : airth(cleanedSubDecl)) : undefined
+        "to": cleanedSubDecl.length != 1 ? "#" : dest,
+        "children": cleanedSubDecl.length != 1 ? (!isPlainLink ? [{label: label, to: dest, "class": "font-bold"}, ...airth(cleanedSubDecl)] : airth(cleanedSubDecl)) : undefined
       });
     }
     return ret

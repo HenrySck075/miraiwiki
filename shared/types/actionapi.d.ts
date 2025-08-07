@@ -233,49 +233,66 @@ export namespace Query {
       canonical: string,
       content: boolean,
       nonincludable: boolean
-    }
-  }
-
-  export namespace Pages {
-    export type Pages<A extends readonly [...object] = []> = ({
-      pages: objs.Page<A>[]
-    });
-
-    export namespace prop {
-      export interface Info {
-        contentmodel: string,
-        pagelanguage: string,
-        pagelanguagehtmlcode: string,
-        pagelanguagedir: string,
-        touched: string,
-        lastrevid: number,
-        length: number
+    };
+    export namespace LogEvent {
+      export interface Base<T extends string, A extends string, PT extends object = object> {
+        logid: number;
+        ns: number;
+        title: string;
+        pageid: number;
+        logpage: number;
+        revid: number;
+        params: PT;
+        type: T;
+        action: A;
+        user: string;
+        timestamp: string;
+        parsedcomment: string;
       }
+      export type Base2<T extends string, PT extends object = object> = Base<T, T, PT>
 
-      interface PageImage_Info {
-        source: string,
-        width: number,
-        height: number
-      }
-
-      export type PageImages<A extends readonly [...any] = [PageImages_name, PageImages_thumbnail]> = Spread<A>;
-      
-      export interface PageImages_name { pageimage: string }
-      export interface PageImages_thumbnail { thumbnail: PageImage_Info }
-      export interface PageImages_original { original: PageImage_Info }
-
-
-      export type CategoryInfo = {
-        categoryinfo: {
-          size: number,
-          pages: number,
-          files: number,
-          subcats: number,
-          hidden: boolean
-        }
-      }
-
-      export type ArticleSnippet = ({ extract: string });
+      export type Block = Base2<"block" | "reblock", {
+        duration: string,
+        flags: string[],
+        restrictions?: {
+          namespaces?: number[],
+          pages?: {
+            page_ns: number,
+            page_title: string
+          }[]
+        },
+        sitewide: boolean,
+        /// empty means indefinite (duration: infinity)
+        expiry?: string
+      }>;
+      export type AFProtectedVars = Base<"abusefilter-protected-vars", string>;
+      export type AFCreate = Base<"abusefilter", "create">;
+      export type AFHit = Base<"abusefilter", "hit">;
+      export type AFModify = Base<"abusefilter", "hit">;
+      export type Unblock = Base<"block", "unblock">;
+      export type Create = Base2<"create">;
+      export type Delete = Base2<"delete">;
+      export type Move = Base2<"move", {
+        target_ns: number,
+        target_title: string,
+        // no redirect
+        suppressredirect: boolean
+      }>;
+      export type Protect = Base2<"protect", {
+        description: string;
+        cascade: boolean;
+        details: {
+          type: string;
+          level: string;
+          expiry: string;
+          cascade: boolean;
+        }[];
+      }>;
+      export type Thank = Base<"thanks", "thank">;
+      export type Upload = Base2<"upload", {
+        img_sha1: string,
+        img_timestamp: string
+      }>;
     }
   }
 
@@ -287,7 +304,7 @@ export namespace Query {
   }
 
   export namespace list {
-    export interface AllPages{
+    export interface AllPages {
       allpages: objs.Page[]
     };
     export interface QueryPage {
@@ -303,6 +320,9 @@ export namespace Query {
           title: string;
         }[];
       }
+    };
+    export interface LogEvents {
+      logevents: objs.LogEvent[]
     }
   }
 

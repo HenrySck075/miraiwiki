@@ -166,12 +166,10 @@ async function query() {
   queryExecuting.value = false;
 }
 
-if (import.meta.server) {
-  const bob = useWikiMeta();
-  useSeoMeta({
-    title: `All pages | ${bob.value.site} | FancyBreeze`
-  })
-}
+const bob = useWikiMeta();
+useSeoMeta({
+  title: `All pages | ${bob.value.site} | FancyBreeze`
+})
 
 await query();
 </script>

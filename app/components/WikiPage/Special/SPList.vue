@@ -159,10 +159,8 @@
 <script setup lang="ts"> 
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 const site = useRoute().params["site"]!;
-if (import.meta.server) {
-  const bob = useWikiMeta();
-  useSeoMeta({
-    title: `Special pages | ${site} | FancyBreeze`
-  })
-}
+const bob = useWikiMeta();
+useSeoMeta({
+  title: `Special pages | ${bob.value.site} | FancyBreeze`
+})
 </script>
