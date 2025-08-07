@@ -6,7 +6,8 @@
           <link rel="stylesheet" v-bind:href="sheet">
         </template>
       </div>
-      <div :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop ooui-theme-fandomooui`">
+      <div
+        :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop ooui-theme-fandomooui`">
         <div class="main-container m-auto">
           <div class="fandom-community-header__background cover fullScreen"
             style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
@@ -21,7 +22,8 @@
                     {{ comments.totalCount }} comments
                   </span>
                   <div class="flex-1"></div>
-                  <UButton color="neutral" @click="commentToggled = !commentToggled">{{commentToggled ? 'Hide' : 'Show'}}</UButton>
+                  <UButton color="neutral" @click="commentToggled = !commentToggled">{{ commentToggled ? 'Hide' :
+                    'Show' }}</UButton>
                 </div>
                 <div :style="commentToggled ? '' : 'display: none'">
                   <template v-for="cmt in comments.threads">
@@ -69,16 +71,16 @@ import type { Comment as WikiaComment } from '~~/shared/types/comment';
 
 import { WikiPageCategory, WikiPageMain, WikiPageSpecial, WikiPageUser } from '#components';
 import type { ShallowRef } from 'vue';
-import type { APIResponse, Parse, Parse_PDisplayTitle, Query_Pages_PPageImages, Query_Pages_PArticleSnippet, Query_Pages_PPageImages_thumbnail } from '~~/shared/types/actionapi';
+import type { API, Query } from '~~/shared/types/actionapi';
 
 
 function pageComponentForNamespace(ns: string): any {
   return (
     ns === "Main" ? WikiPageMain :
-    ns === "Category" ? WikiPageCategory :
-    ns === "User" ? WikiPageUser :
-    ns === "Special" ? WikiPageSpecial :
-    'div'
+      ns === "Category" ? WikiPageCategory :
+        ns === "User" ? WikiPageUser :
+          ns === "Special" ? WikiPageSpecial :
+            'div'
   )
 }
 
@@ -93,6 +95,8 @@ const site = route.params.site as string;
 if (site.includes(".")) {
   throw "amogus";
 }
+// save the last visited wiki; see /wiki/[...page].vue for details (i think you can figure out why)
+useCookie("lastVisitedWiki").value = site;
 
 const indieVersion: ({
   id: string;
@@ -123,7 +127,7 @@ const indieVersion: ({
 }))
 
 
-const displayTitle = getPageNamespace(page) !== "Special" ? cheerio.load((await useWikiFetch<APIResponse<[Parse<[Parse_PDisplayTitle]>]>>(
+const displayTitle = getPageNamespace(page) !== "Special" ? cheerio.load((await useWikiFetch<API.Response<[Parse.Parse<[Parse.prop.DisplayTitle]>]>>(
   '/parse',
   {
     query: {
@@ -133,7 +137,15 @@ const displayTitle = getPageNamespace(page) !== "Special" ? cheerio.load((await 
   }
 )).data.value.parse.displaytitle, null, false)("*").text() : "";
 const url = useRequestURL().toString();
-const { data: balls } = await useWikiFetch<APIResponse<[Query<[Query_Pages<[Query_Pages_PArticleSnippet, Query_Pages_PPageImages<[Query_Pages_PPageImages_thumbnail]>]>]>]>>(
+const { data: balls } = await useWikiFetch<API.Response<[
+  Query.Query<[
+    Query.Pages.Pages<[
+      Query.Pages.prop.ArticleSnippet, Query.Pages.prop.PageImages<[
+        Query.Pages.prop.PageImages_thumbnail
+      ]>
+    ]>
+  ]>
+]>>(
   "/query",
   {
     query: {

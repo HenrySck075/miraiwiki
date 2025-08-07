@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { useWikiFetch } from '~/composables/api';
-import type { APIResponse, Query, Query_LAllPages, Query_MSiteInfo_namespace } from '~~/shared/types/actionapi';
+import type { API, Query } from '~~/shared/types/actionapi';
 
 //const {site} = defineProps<{site: string}>();
 
@@ -63,9 +63,9 @@ function navNext() {
 const nsId = ref(Number.parseInt((route.query["namespace"] as string | null) ?? "0"));
 
 const namespaces = (await useWikiFetch<
-APIResponse<[
-  Query<[
-    Query_MSiteInfo_namespace
+API.Response<[
+  Query.Query<[
+    Query.meta.SiteInfo.namespace
   ]>
 ]>
 >('/query?meta=siteinfo&siprop=namespaces%7Cnamespacealiases')).data.value.query.namespaces;
@@ -110,9 +110,9 @@ async function query() {
     q["apnamespace"] = nsId.value.toString();
   }
   const {data: resNR} = await useWikiFetch<
-    APIResponse<[
-      Query<[
-        Query_LAllPages
+    API.Response<[
+      Query.Query<[
+        Query.list.AllPages
       ]>
     ]>
   >("/query", {
@@ -121,9 +121,9 @@ async function query() {
 
   q["apfilterredir"] = "redirects";
   const {data: resR} = await useWikiFetch<
-    APIResponse<[
-      Query<[
-        Query_LAllPages
+    API.Response<[
+      Query.Query<[
+        Query.list.AllPages
       ]>
     ]>
   >("/query", {
@@ -146,9 +146,9 @@ async function query() {
 
   // this isnt sorted in the same order as ascending...
   prev.value = pages.value[0] ? (await useWikiFetch<
-    APIResponse<[
-      Query<[
-        Query_LAllPages
+    API.Response<[
+      Query.Query<[
+        Query.list.AllPages
       ]>
     ]>
   >("/query", {

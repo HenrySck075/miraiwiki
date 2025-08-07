@@ -1,22 +1,65 @@
 <template>
   <div id="special-page">
-    <component :is="getComponentForSpecialPage()" :site="site"></component>
+    <component :is="getComponentForSpecialPage()" :site="site" v-if="!qpPages.includes(specialPage.toLowerCase())"></component>
+    <WikiPageSpecialQPBased :type="specialPage" v-else/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { WikiPageSpecialAllPages } from '#components';
+import { WikiPageSpecialAllPages, WikiPageSpecialSPList } from '#components';
 
-const {page} = defineProps<{
+const { page } = defineProps<{
   site: string,
   page: string
 }>();
 
-const specialPage = removePrefix(page,"Special:")
+const specialPage = removePrefix(page, "Special:").trim()
+
+/// meaning query pages are case-insensitive
+const qpPages = [
+  'allinfoboxes',
+  'ancientpages',
+  'brokenredirects',
+  'deadendpages',
+  'disambiguationpagelinks',
+  'disambiguationpages',
+  'doubleredirects',
+  'fewestrevisions',
+  'listduplicatedfiles',
+  'listredirects',
+  'lonelypages',
+  'longpages',
+  'mediastatistics',
+  'mostcategories',
+  'mostimages',
+  'mostinterwikis',
+  'mostlinked',
+  'mostlinkedcategories',
+  'mostlinkedtemplates',
+  'mostrevisions',
+  'nonportableinfoboxes',
+  'shortpages',
+  'uncategorizedcategories',
+  'uncategorizedimages',
+  'uncategorizedpages',
+  'uncategorizedtemplates',
+  'unorganizedtemplates',
+  'unusedcategories',
+  'unusedimages',
+  'unusedtemplates',
+  'unwatchedpages',
+  'wantedcategories',
+  'wantedfiles',
+  'wantedpages',
+  'wantedtemplates',
+  'withoutimages',
+  'withoutinterwiki'
+]
 
 function getComponentForSpecialPage() {
   return specialPage === "AllPages" ? WikiPageSpecialAllPages :
-  'div';
+  specialPage === "SpecialPages" ? WikiPageSpecialSPList :
+    'div';
 }
 </script>
 

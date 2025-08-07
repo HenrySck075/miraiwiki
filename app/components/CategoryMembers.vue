@@ -26,19 +26,23 @@
 
 <script setup lang="ts">
 import { useWikiFetch } from '~/composables/api';
+
+import { computed } from 'vue';
+import type { API, Query } from '~~/shared/types/actionapi';
+
 const route = useRoute();
 const page = (route.params.page as string[]).join("/");
 
-type mambo = Query_OPage<[
-  Query_Pages_PPageImages<[
-    Query_Pages_PPageImages_thumbnail
+type mambo = Query.objs.Page<[
+  Query.Pages.prop.PageImages<[
+    Query.Pages.prop.PageImages_thumbnail
   ]>
 ]>;
 const { data: resp } = useWikiFetch<APIResponse<[
-  Query<[
-    Query_Pages<[
-      Query_Pages_PPageImages<[
-        Query_Pages_PPageImages_thumbnail
+  Query.Query<[
+    Query.Pages.Pages<[
+      Query.Pages.prop.PageImages<[
+        Query.Pages.prop.PageImages_thumbnail
       ]>
     ]>
   ]>
@@ -52,10 +56,10 @@ const { data: resp } = useWikiFetch<APIResponse<[
     "piprop": "thumbnail"
   }
 })
-const {data:catinfo} = useWikiFetch<APIResponse<[
-  Query<[
-    Query_Pages<[
-      Query_Pages_PCategoryInfo
+const {data:catinfo} = useWikiFetch<API.Response<[
+  Query.Query<[
+    Query.Pages.Pages<[
+      Query.Pages.prop.CategoryInfo
     ]>
   ]>
 ]>>('/query', {
@@ -67,9 +71,6 @@ const {data:catinfo} = useWikiFetch<APIResponse<[
 
 const theme = useCookie("theme", { default: () => "Dark" });
 
-import { computed } from 'vue';
-import type { APIResponse, Query, Query_OPage, Query_Pages, Query_Pages_PCategoryInfo, Query_Pages_PPageImages, Query_Pages_PPageImages_thumbnail } from '~~/shared/types/actionapi';
-import type { Spread } from '~~/shared/types/objmerger';
 const groupedMembers = computed(() => {
   if (!resp.value) return {};
   const unordered = resp.value.query.pages.reduce((groups: Record<string, mambo[]>, member: mambo) => {

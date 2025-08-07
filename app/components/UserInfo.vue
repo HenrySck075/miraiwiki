@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import type { APIResponse, Query, Query_AllUsers } from '~~/shared/types/actionapi';
+import type { API, Query } from '~~/shared/types/actionapi';
 ///{"userData":{"id":4403388,"username":"Fandom","avatar":"https:\/\/static.wikia.nocookie.net\/84586f7d-1103-4bbe-b69a-08de7e6ccb4c\/thumbnail\/width\/400\/height\/400","name":"","bio":"","website":"","twitter":"","fbPage":"","discordHandle":"","hideEditsWikis":0,"edits":"20","registration":"9 August 2017","userPage":"https:\/\/love-live.fandom.com\/wiki\/User:Fandom","contributionsUrl":"\/wiki\/Special:Contributions\/Fandom","userProfileActivityUrl":"\/wiki\/Special:UserProfileActivity\/Fandom","messageWallUrl":"\/wiki\/Message_Wall:Fandom","messageWallNewMessageUrl":"\/wiki\/Message_Wall:Fandom?wall-editor=new","userBlogUrl":"\/wiki\/User_blog:Fandom","showZeroStates":true,"tags":["Staff"],"posts":2,"discussionUserUrl":"\/f\/u\/4403388","isUserPageOwner":false,"canEditProfile":false,"canRemoveAvatar":false,"isBlocked":false,"isMessageWallBlocked":false,"localEdits":20},"isReadOnly":false}
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 const {user, site} = defineProps<{
@@ -56,7 +56,7 @@ const {user, site} = defineProps<{
   user: string
 }>();
 ///https://love-live.fandom.com/wikia.php?controller=UserProfile&method=getUserData&format=json&userId=25708385
-const userid = await useFetch<APIResponse<[Query<[Query_AllUsers]>]>>(`/api/${site}/query`, {
+const userid = await useFetch<API.Response<[Query.Query<[Query.AllUsers]>]>>(`/api/${site}/query`, {
   query: {
     "list": "allusers",
     "aufrom": user,

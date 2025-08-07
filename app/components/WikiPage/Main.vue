@@ -123,7 +123,7 @@ const { data: data } = await useFetch(
   const $ = cheerio.load(data.value.parse.text);
   const doc = $("body > div").find("img, a, span, audio");
   $('<button type="button" class="mw-collapsible-toggle mw-collapsible-toggle-default" aria-expanded="false" onclick="this.ariaExpanded = this.ariaExpanded === \'true\' ? \'false\' : \'true\'" tabindex="0"><span class="mw-collapsible-text"></span></button>')
-  .prependTo($("body > div div.mw-collapsible"));
+  .prependTo($("body > div div.mw-collapsible, body > div table.mw-collapsible > tbody > tr:first-child > th"));
   updateTree(doc);
   const sliders = $("div.fandom-slider");
   const extraSheets = [];
@@ -276,19 +276,31 @@ div#__nuxt.isolate #wiki_content div.gallery-image-wrapper > a {
   pointer-events:none;
 }
 
-button.mw-collapsible-toggle[aria-expanded=true] > span.mw-collapsible-text::before {
-  content: "Hide";
-}
-button.mw-collapsible-toggle[aria-expanded=false] > span.mw-collapsible-text::before {
-  content: "Show";
-}
+
 button.mw-collapsible-toggle::before {
   content: "[";
 }
 button.mw-collapsible-toggle::after {
   content: "]";
 }
+
+div.mw-collapsible button.mw-collapsible-toggle[aria-expanded=true] > span.mw-collapsible-text::before {
+  content: "Hide";
+}
+div.mw-collapsible button.mw-collapsible-toggle[aria-expanded=false] > span.mw-collapsible-text::before {
+  content: "Show";
+}
 div.mw-collapsible:has(button.mw-collapsible-toggle[aria-expanded=false]) > div.mw-collapsible-content {
+  display: none;
+}
+
+table.mw-collapsible button.mw-collapsible-toggle[aria-expanded=true] > span.mw-collapsible-text::before {
+  content: "Collapse";
+}
+table.mw-collapsible button.mw-collapsible-toggle[aria-expanded=false] > span.mw-collapsible-text::before {
+  content: "Expand";
+}
+table.mw-collapsible:has(tbody > tr:first-child > th > button.mw-collapsible-toggle[aria-expanded=false]) > tbody > tr:last-child {
   display: none;
 }
 </style>
