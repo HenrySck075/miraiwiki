@@ -18,7 +18,7 @@
       {{ data.title }}
     </ULink>
     <!--questionable content-->
-    <WikiaDoc class="fancybreeze-post__content" v-if="content" :content="content" :attachments="data._embedded.attachments[0]!"></WikiaDoc>
+    <WikiaDoc class="miraiwiki-post__content" v-if="content" :content="content" :attachments="data._embedded.attachments[0]!"></WikiaDoc>
     <div v-else-if="data.poll">
       <!--Laid them out as a list of buttons if the first option doesnt have an image-->
       <div class="flex flex-col space-y-2" v-if="data.poll.answers[0]!.image==null">

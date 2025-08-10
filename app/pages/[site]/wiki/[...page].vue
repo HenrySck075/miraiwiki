@@ -191,14 +191,14 @@ useHead({
 })
 
 useSeoMeta({
-  title: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`,
+  title: `${displayTitle} | ${meta.value.sitename} | MiraiWiki`,
   description: balls.value.query.pages[0]!.extract,
   robots: {
     maxImagePreview: "standard",
   },
   twitterCard: "summary",
   twitterDescription: balls.value.query.pages[0]!.extract,
-  twitterTitle: `${displayTitle} | ${meta.value.sitename} | FancyBreeze`,
+  twitterTitle: `${displayTitle} | ${meta.value.sitename} | MiraiWiki`,
   ogSiteName: meta.value.sitename,
   ogType: "article",
   ogTitle: displayTitle,
@@ -295,11 +295,11 @@ if (!indieVersion) {
   background-position: center top;
 }
 
-.fancybreeze-disabledImages {
+.miraiwiki-disabledImages {
   display: none;
 }
 
-.fancybreeze-slider__caption-cur {
+.miraiwiki-slider__caption-cur {
   display: block !important;
   opacity: 1 !important;
 }

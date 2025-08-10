@@ -9,21 +9,21 @@
         </UDropdownMenu>
       </template>
       <div style="flex-grow: 1"></div>
-      <UButton icon="mdi:github" to="https://github.com/HenrySck075/fancybreeze" variant="ghost" color="neutral" title="Source code"></UButton>
+      <UButton icon="mdi:github" to="https://github.com/HenrySck075/miraiwiki" variant="ghost" color="neutral" title="Source code"></UButton>
       <Search>
       </Search>
       <UDropdownMenu :items="themeItems">
         <UButton :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
       </UDropdownMenu>
     </div>
-    <div id="fancybreeze-content" class="overflow-y-scroll">
+    <div id="miraiwiki-content" class="overflow-y-scroll">
       <slot></slot>
     </div>
   </div>
 </template>
 
 <style>
-#fancybreeze-content > div {
+#miraiwiki-content > div {
   --f-max-width: 988px;
 }
 </style>

@@ -168,7 +168,7 @@ async function query() {
 
 const bob = useWikiMeta();
 useSeoMeta({
-  title: `All pages | ${bob.value.site} | FancyBreeze`
+  title: `All pages | ${bob.value.site} | MiraiWiki`
 })
 
 await query();

@@ -95,7 +95,7 @@ async function query() {
 await query();
 
 useSeoMeta({
-  title: ()=>`From ${author}: ${title} | FancyBreeze`
+  title: ()=>`From ${author}: ${title} | MiraiWiki`
 })
 //
 </script>

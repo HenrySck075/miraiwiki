@@ -159,6 +159,6 @@ data.value = await useWikiFetch<macaroni>("/query", {
 
 const bob = useWikiMeta();
 useSeoMeta({
-  title: `${titleAndDesc[qppage]![0]} | ${bob.value.site} | FancyBreeze`
+  title: `${titleAndDesc[qppage]![0]} | ${bob.value.site} | MiraiWiki`
 })
 </script>

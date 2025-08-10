@@ -161,6 +161,6 @@ const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shall
 const site = useRoute().params["site"]!;
 const bob = useWikiMeta();
 useSeoMeta({
-  title: `Special pages | ${bob.value.site} | FancyBreeze`
+  title: `Special pages | ${bob.value.site} | MiraiWiki`
 })
 </script>

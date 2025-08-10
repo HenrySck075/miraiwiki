@@ -26,7 +26,7 @@
     <div class="grid gap-4" style="grid-template-columns: 2fr 1fr;">
       <div id="threadsListView" class="flex flex-col !space-y-4">
         <template v-for="thread in threads">
-          <DiscussionPost :data="thread" class="fancybreeze-post__constrained" />
+          <DiscussionPost :data="thread" class="miraiwiki-post__constrained" />
         </template>
         <UButton class="w-full" style="text-align: center;" @click="fetchThreads()" loading-auto>Load more</UButton>
       </div>
@@ -174,22 +174,22 @@ const forums = computed(()=>data.value!._embedded.forums.toSorted((a,b)=>threadC
 
 const {data: feeds} = await useFetch<FeedsAndPosts>(`/api/${route.params.site}/FeedsAndPosts/getAll`)
 useSeoMeta({
-  title: ()=>`Discuss everything about ${feeds.value?.wikiVariables.name} | FancyBreeze`
+  title: ()=>`Discuss everything about ${feeds.value?.wikiVariables.name} | MiraiWiki`
 })
 </script>
 
 <style>
 @reference "tailwindcss";
 
-.fancybreeze-post__constrained {
+.miraiwiki-post__constrained {
   --max-content-height: 700px;
 }
-.fancybreeze-post__constrained .fancybreeze-post__content {
+.miraiwiki-post__constrained .miraiwiki-post__content {
 	max-height: var(--max-content-height) !important;
   position: relative;
   overflow-y: hidden;
 }
-.fancybreeze-post__constrained .fancybreeze-post__content::before {
+.miraiwiki-post__constrained .miraiwiki-post__content::before {
 	background: linear-gradient(to bottom,color-mix(in oklab, var(--ui-bg-elevated) 0%, transparent) 300px,var(--ui-bg-elevated) 100%);
 	height: var(--max-content-height);
 	pointer-events: none;

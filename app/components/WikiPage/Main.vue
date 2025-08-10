@@ -74,7 +74,7 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
   e.removeAttr("srcset")
   e.removeClass("lazyload")
   e.remove(".mw-editsection");
-  if (e.is("img")) e.attr("loading", "lazy"); /*e.addClass("fancybreeze-disabledImages");*/
+  if (e.is("img")) e.attr("loading", "lazy"); /*e.addClass("miraiwiki-disabledImages");*/
   for (const elem of e) {
     if (elem.tagName == "img") {
       // replace the src prefix from https:// to /wikiassets/
@@ -98,7 +98,7 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
       elem.attribs["src"] = elem.attribs["src"]!.replace("https://", '/api/assets/');
       elem.attribs["preload"] = "none";
       delete elem.attribs["width"];
-      //elem.tagName = "fancybreeze-audio";
+      //elem.tagName = "miraiwiki-audio";
     }
   }
 }
@@ -129,7 +129,7 @@ const { data: data } = await useFetch(
   const extraSheets = [];
   if (sliders.length != 0) {
     extraSheets.push('ext.fandom.slider.css')
-    sliders.find(".fandom-slider__nav__caption div:first-child").addClass("fancybreeze-slider__caption-cur");
+    sliders.find(".fandom-slider__nav__caption div:first-child").addClass("miraiwiki-slider__caption-cur");
     //includeWDSIcons = true;
   }
   if (sliders.length != 0 || $("div.wikia-gallery").length != 0) {
@@ -153,7 +153,7 @@ onMounted(() => {
     })
   }
 
-  //customElements.define("fancybreeze-audio", defineCustomElement(FAudio))
+  //customElements.define("miraiwiki-audio", defineCustomElement(FAudio))
 
   const amogus = useRouter();
 
@@ -232,8 +232,8 @@ onMounted(() => {
         idx++;
       }
       sliderList.style.marginLeft = -(shift).toString()+"px";
-      sliderCaptions.querySelector("div.fancybreeze-slider__caption-cur")!.classList.remove("fancybreeze-slider__caption-cur");
-      sliderCaptions.querySelector(`div[data-index="${idx}"]`)!.classList.add("fancybreeze-slider__caption-cur")
+      sliderCaptions.querySelector("div.miraiwiki-slider__caption-cur")!.classList.remove("miraiwiki-slider__caption-cur");
+      sliderCaptions.querySelector(`div[data-index="${idx}"]`)!.classList.add("miraiwiki-slider__caption-cur")
     }, 8000)
   }
 
