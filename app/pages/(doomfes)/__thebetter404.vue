@@ -65,7 +65,7 @@ function goToOtherWiki() {
 }
 
 definePageMeta({
-    alias: ["/wiki/:page(.*)*", "/f", "/f/p/:id"]
+  alias: ["/wiki/:page(.*)*", "/f", "/f/p/:id"]
 });
 
 useSeoMeta({

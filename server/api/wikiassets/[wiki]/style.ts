@@ -61,6 +61,7 @@ const assetsDomains = [
 ]
 import * as cssParser from "css";
 import { removePrefix } from "~~/shared/utils/utils"; /// vscode is bad at noticing that these are autoimported
+import * as beautify from "js-beautify";
 export default defineEventHandler(async (e) => {
     const wiki = getRouterParam(e, "wiki");
     const theme = getQuery(e)["variant"] ?? "dark"
@@ -96,26 +97,30 @@ export default defineEventHandler(async (e) => {
             const data = await $fetch.raw(`https://${wiki}.fandom.com/load.php?lang=en&${queryStr}`, headers);
             css = data._data as string;
             /// copies all file-related headers over
-            for (const key of ['content-type', 'content-length'] /*data.headers.keys().filter((e)=>!(e.startsWith('x-') || ['set-cookie', 'access-control-allow-origin', 'strict-transport-security'].includes(e)))*/) {
+            for (const key of ['content-type', /*'content-length'*/] /*data.headers.keys().filter((e)=>!(e.startsWith('x-') || ['set-cookie', 'access-control-allow-origin', 'strict-transport-security'].includes(e)))*/) {
                 e.node.res.setHeader(key, data.headers.get(key)!);
             }
         }
 
         // convert the import directives into one single format of @import url("url");
-        css =
+        css = 
         // 1. @import url(urlUnquoted)
         css.replaceAll(/@import\s+url\(([^"]+?)\);/g, '@import url("$1");')
         // 2. @import "url"
         .replaceAll(/@import\s+"([^"]+?)";/g, '@import url("$1");')
-
         // remove all import rules from the css and store them somewhere
         let importRules: string[] = [];
         css = css.replace(/@import\s+url\(([^)]+?)\);/g, (match, url) => {
             importRules.push(match);
             return '';
         });
-            
-        const cssTree = cssParser.parse(css);
+/*
+        return beautify.default.css(css, {
+            indent_size: 2,
+            indent_char: " "
+        });
+*/
+        const cssTree = cssParser.parse(/*beautify.default.css(css)*/css);
         const rules = cssTree.stylesheet!.rules;
 
         if (type === "main") {

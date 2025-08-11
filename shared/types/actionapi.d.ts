@@ -1,3 +1,8 @@
+/**
+ * A selection of MediaWiki response interfaces.
+ */
+
+
 import type { Spread } from "./objmerger";
 
 export namespace API {
@@ -219,6 +224,50 @@ export namespace Query {
     }[]
   });
 
+
+  export namespace Pages {
+    export type Pages<A extends readonly [...object] = []> = ({
+      pages: objs.Page<A>[]
+    });
+
+    export namespace prop {
+      export interface Info {
+        contentmodel: string,
+        pagelanguage: string,
+        pagelanguagehtmlcode: string,
+        pagelanguagedir: string,
+        touched: string,
+        lastrevid: number,
+        length: number
+      }
+
+      interface PageImage_Info {
+        source: string,
+        width: number,
+        height: number
+      }
+
+      export type PageImages<A extends readonly [...any] = [PageImages_name, PageImages_thumbnail]> = Spread<A>;
+      
+      export interface PageImages_name { pageimage: string }
+      export interface PageImages_thumbnail { thumbnail: PageImage_Info }
+      export interface PageImages_original { original: PageImage_Info }
+
+
+      export type CategoryInfo = {
+        categoryinfo: {
+          size: number,
+          pages: number,
+          files: number,
+          subcats: number,
+          hidden: boolean
+        }
+      }
+
+      export type ArticleSnippet = ({ extract: string });
+    }
+  }
+
   export namespace objs {
     export type Page<A extends readonly [...object] = []> = Spread<[{
       pageid: number,
@@ -294,6 +343,24 @@ export namespace Query {
         img_timestamp: string
       }>;
     }
+    export interface HistoryEntry {
+      type: "edit" | "new" | "external" | "log" | "categorize";
+      ns: number;
+      title: string;
+      pageid: number;
+      revid: number;
+      old_revid: number;
+      rcid: number;
+      bot: boolean;
+      new: boolean;
+      minor: boolean;
+      oldlen: number;
+      newlen: number;
+      timestamp: string;
+      comment: string;
+      parsedcomment: string;
+      user: string;
+    }
   }
 
   export namespace meta {
@@ -323,6 +390,9 @@ export namespace Query {
     };
     export interface LogEvents {
       logevents: objs.LogEvent[]
+    }
+    export interface RecentChanges {
+      recentchanges: objs.HistoryEntry[];
     }
   }
 

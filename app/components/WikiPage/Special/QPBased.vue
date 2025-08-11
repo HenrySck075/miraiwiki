@@ -147,15 +147,7 @@ watch([limit, offset], ()=>{
       "qpoffset": offset
     }
   }).then((v)=>data.value = v.data.value);
-});
-data.value = await useWikiFetch<macaroni>("/query", {
-  query: {
-    "list": "querypage",
-    "qppage": qppage,
-    "qplimit": limit,
-    "qpoffset": offset
-  }
-}).then((v)=>v.data.value)
+}, {immediate: true});
 
 const bob = useWikiMeta();
 useSeoMeta({

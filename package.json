@@ -17,6 +17,7 @@
     "better-sqlite3": "^12.2.0",
     "cheerio": "^1.1.0",
     "css": "^3.0.0",
+    "js-beautify": "^1.15.4",
     "nuxt": "^4.0.0",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1"
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@iconify-json/mdi": "^1.2.3",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/css": "^0.0.38"
+    "@types/css": "^0.0.38",
+    "@types/js-beautify": "^1.14.3"
   }
 }

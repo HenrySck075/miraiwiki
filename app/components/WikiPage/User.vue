@@ -1,5 +1,5 @@
 <template>
-  <WikiPageMain :site="site" :page="page" :sheets="sheets" @sheet-add="['onUpdate:sheets']"> <!--the fuck-->
+  <WikiPageMain :site="site" :page="page" @sheetAdd="$emit('sheetAdd', $event)">
     <template #top>
       <UserInfo :site="site" :user="removePrefix(page, 'User:')"></UserInfo>
     </template>
@@ -11,5 +11,5 @@ defineProps<{
   site: string,
   page: string
 }>();
-defineModel<string[]>("sheets", {required:true});
+// Sheets handled by composable
 </script>

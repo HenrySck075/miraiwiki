@@ -103,7 +103,7 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
   }
 }
 
-const sheets = defineModel<string[]>("sheets", {required: true});
+// Remove defineModel, use sheetAdd event instead
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 const { data: data } = await useFetch(
   `/api/${site}/parse`,
@@ -136,7 +136,8 @@ const { data: data } = await useFetch(
     extraSheets.push('ext.fandom.photoGallery.gallery.css')
   }
   if (extraSheets.length != 0) {
-    sheets.value.push(`/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=${extraSheets.join("|")}`)
+    const { addSheet } = useSheets();
+    addSheet(`modules=${extraSheets.join("|")}`)
   }
   data.value.parse.text = $("body > div").html();
   //
@@ -144,15 +145,8 @@ const { data: data } = await useFetch(
 })
 
 const content = useTemplateRef("content");
+import { useSheets } from '#imports';
 onMounted(() => {
-  if (import.meta.dev) {
-    const toast = useToast()
-  // todo: this reveals that nuxt in fact reloads the page again if i replace the wiki page as a redirect
-    toast.add({
-      title: "Hydration completed"
-    })
-  }
-
   //customElements.define("miraiwiki-audio", defineCustomElement(FAudio))
 
   const amogus = useRouter();
@@ -211,7 +205,6 @@ onMounted(() => {
   // idk
   contentNode.querySelectorAll("audio.mw-file-element").forEach((v)=>{
     (v as HTMLAudioElement).style.minWidth = (v as HTMLAudioElement).style.width;
-    (v as HTMLAudioElement).style.width = ""
   })
   
   // gallery slider

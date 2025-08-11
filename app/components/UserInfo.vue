@@ -1,7 +1,5 @@
 <template>
   <div id="userProfileApp"> <!--User page-->
-    <link rel="stylesheet"
-      :href="`/api/wikiassets/${site}/style?variant=${currentTheme.toLowerCase()}&modules=ext.fandom.UserProfile.css`">
     <template v-if="meta">
       <div class="user-identity-box__wrapper">
         <section class="user-identity-box" itemtype="http://schema.org/Person">
@@ -63,6 +61,8 @@ const userid = await useFetch<API.Response<[Query.Query<[Query.AllUsers]>]>>(`/a
     "aulimit": "1"
   }
 }).then(data => data.data.value!.query.allusers[0]!.userid);
+
+useSheets().addSheet("modules=ext.fandom.UserProfile.css");
 
 interface UserData {
   id: number;

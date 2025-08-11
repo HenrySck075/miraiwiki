@@ -3,16 +3,16 @@
     <div id="wiki_content" v-if="hatred">
       <div ref="themeVarsSheet">
         <template v-for="sheet in sheets">
-          <link rel="stylesheet" v-bind:href="sheet">
+          <link rel="stylesheet" v-bind:href="`/api/wikiassets/${site}/style?variant=${currentTheme.toLowerCase()}&${sheet}`">
         </template>
       </div>
       <div
-        :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop ooui-theme-fandomooui`">
+        :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop ooui-theme-fandomooui mw-rcfilters-ui-initialized`">
         <div class="main-container m-auto">
           <div class="fandom-community-header__background cover fullScreen"
             style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
           <div class="resizable-container">
-            <component :is="pageComponentForNamespace(getPageNamespace(page))" v-model:sheets="sheets" :site="site"
+            <component :is="pageComponentForNamespace(getPageNamespace(page))" :site="site"
               :page="page"></component>
             <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"
               style="margin-top: 8px" ref="commentsNode" v-if="['Main'].includes(getPageNamespace(page))">
@@ -68,11 +68,19 @@
 import * as cheerio from 'cheerio';
 import { useElementVisibility } from '@vueuse/core';
 import type { Comment as WikiaComment } from '~~/shared/types/comment';
-
+import { useSheets } from '#imports';
 import { WikiPageCategory, WikiPageMain, WikiPageSpecial, WikiPageUser } from '#components';
 import type { ShallowRef } from 'vue';
 import type { API, Query } from '~~/shared/types/actionapi';
-
+if (import.meta.dev) {
+  onMounted(()=>{
+    const toast = useToast()
+  // todo: this reveals that nuxt in fact reloads the page again if i replace the wiki page as a redirect
+    toast.add({
+      title: "Hydration completed"
+    })
+  })
+}
 
 function pageComponentForNamespace(ns: string): any {
   return (
@@ -116,7 +124,8 @@ const indieVersion: ({
   destination_content_path: string;
   destination_host: string;
   tags: Array<string>;
-}) | null = (await useFetch("http://localhost:3000/indies_en.json").then(data => {
+}) | null = import.meta.dev || useCookie("bypassNro", { "default": () => false, watch: "shallow" }).value 
+? null : (await useFetch("http://localhost:3000/indies_en.json").then(data => {
   const indies = data.data.value! as any[];
   for (const i of indies) {
     for (const originInfo of i.origins) {
@@ -216,7 +225,13 @@ const hatred = !page.startsWith("User blog:")
 if (!hatred) {
   await navigateTo(`/${site}`)
 }
-let sheets: globalThis.Ref<string[], string[]>;
+const { sheets, addSheet: onSheetAdd, resetSheets } = useSheets();
+
+resetSheets([
+  'type=main',
+  'type=wikiTheme',
+  'type=themeVars',
+]);
 let themeVarsSheet: Readonly<ShallowRef<HTMLDivElement | null>>;
 let isCommentsVisible: Ref<boolean, boolean>;
 type beef = ({
@@ -229,12 +244,6 @@ let comments: Ref<beef | null>;
 let redirectUrl: string;
 let commentToggled = ref(false);
 if (!indieVersion) {
-  sheets = ref([
-    //`/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=site.styles`,
-    `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=main`,
-    `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=wikiTheme`,
-    `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&type=themeVars`,
-  ]);
   themeVarsSheet = useTemplateRef("themeVarsSheet");
   watch(currentTheme, () => {
     document.documentElement.className = currentTheme.value.toLowerCase();
