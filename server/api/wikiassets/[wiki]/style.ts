@@ -90,7 +90,8 @@ export default defineEventHandler(async (e) => {
         }
         else {
             const query = Object.assign({
-                "only": "styles"
+                "skin": "fandomdesktop",
+                ...(((getQuery(e)["modules"] as string | null)?.includes(".css")) && {"only": "styles"})
             }, getQuery(e));
             delete query["variant"];
             const queryStr = Object.keys(query).map((key) => `${key}=${query[key]}`).join("&");
@@ -99,6 +100,15 @@ export default defineEventHandler(async (e) => {
             /// copies all file-related headers over
             for (const key of ['content-type', /*'content-length'*/] /*data.headers.keys().filter((e)=>!(e.startsWith('x-') || ['set-cookie', 'access-control-allow-origin', 'strict-transport-security'].includes(e)))*/) {
                 e.node.res.setHeader(key, data.headers.get(key)!);
+            }
+            e.node.res.statusCode = data.status;
+            // early return if content-type is not css
+            console.log(e.node.req.url);
+            console.log(data.headers.get("content-type"))
+            if (!data.headers.get("content-type")?.includes("text/css") || data.status !== 200) {
+                e.node.res.write(css);
+                e.node.res.end();
+                return;
             }
         }
 

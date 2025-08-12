@@ -1,8 +1,16 @@
 <template></template>
 <script setup lang="ts">
 
-    const site = useRoute().params.site;
+    const site = useRoute().params.site as string;
+    import fs from 'fs'
+    import path from 'path'
 
+    const publicDir = path.resolve(process.cwd(), 'public')
+    const publicFiles = fs.readdirSync(publicDir)
+
+    if (publicFiles.includes(site)) {
+        throw new Error('if useFetch calls this i will kms')
+    }
     const res = await $fetch<{ parse: { wikitext: string } }>(
         `/api/${site}/parse`,
         { query: {

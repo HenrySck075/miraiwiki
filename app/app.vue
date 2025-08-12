@@ -9,9 +9,17 @@
 
 <script setup lang="ts">
 useRouter().options.scrollBehavior = (to, from, savedPosition) => {
+  console.log(savedPosition);
   // If a saved position exists (e.g., from browser back/forward navigation),
   // restore it.
-  if (savedPosition) {
+  if (to.hash) {
+      // If a hash exists in the target route, scroll to that element
+      return {
+        el: to.hash,
+        behavior: 'smooth', // Optional: for smooth scrolling
+      };
+    }
+  else if (savedPosition) {
     return savedPosition;
   }
 

@@ -284,21 +284,28 @@ export namespace Query {
       nonincludable: boolean
     };
     export namespace LogEvent {
-      export interface Base<T extends string, A extends string, PT extends object = object> {
+      export interface Base {
         logid: number;
         ns: number;
         title: string;
         pageid: number;
         logpage: number;
         revid: number;
-        params: PT;
-        type: T;
-        action: A;
+        params: {};
+        type: string;
+        action: string;
         user: string;
         timestamp: string;
         parsedcomment: string;
       }
-      export type Base2<T extends string, PT extends object = object> = Base<T, T, PT>
+      export interface BaseTyped<T extends string, A extends string, PT extends object = {}> extends Base {
+        params: PT;
+        type: T;
+        action: A;
+      }
+      export type LogEventParam<T> = T extends BaseTyped<string, string, infer U> ? U : never;
+
+      export type Base2<T extends string, PT extends object = {}> = BaseTyped<T, T, PT>
 
       export type Block = Base2<"block" | "reblock", {
         duration: string,
@@ -314,11 +321,11 @@ export namespace Query {
         /// empty means indefinite (duration: infinity)
         expiry?: string
       }>;
-      export type AFProtectedVars = Base<"abusefilter-protected-vars", string>;
-      export type AFCreate = Base<"abusefilter", "create">;
-      export type AFHit = Base<"abusefilter", "hit">;
-      export type AFModify = Base<"abusefilter", "hit">;
-      export type Unblock = Base<"block", "unblock">;
+      export type AFProtectedVars = BaseTyped<"abusefilter-protected-vars", string>;
+      export type AFCreate = BaseTyped<"abusefilter", "create">;
+      export type AFHit = BaseTyped<"abusefilter", "hit">;
+      export type AFModify = BaseTyped<"abusefilter", "hit">;
+      export type Unblock = BaseTyped<"block", "unblock">;
       export type Create = Base2<"create">;
       export type Delete = Base2<"delete">;
       export type Move = Base2<"move", {
@@ -337,14 +344,14 @@ export namespace Query {
           cascade: boolean;
         }[];
       }>;
-      export type Thank = Base<"thanks", "thank">;
+      export type Thank = BaseTyped<"thanks", "thank">;
       export type Upload = Base2<"upload", {
         img_sha1: string,
         img_timestamp: string
       }>;
     }
     export interface HistoryEntry {
-      type: "edit" | "new" | "external" | "log" | "categorize";
+      type: "edit" | "new" | "external" | "categorize";
       ns: number;
       title: string;
       pageid: number;
@@ -360,6 +367,13 @@ export namespace Query {
       comment: string;
       parsedcomment: string;
       user: string;
+    }
+    export interface LogHistoryEntry extends HistoryEntry {
+      type: "log",
+      logid: number,
+      logtype: string,
+      logaction: string,
+      logparams: object,
     }
   }
 

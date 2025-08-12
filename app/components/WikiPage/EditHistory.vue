@@ -27,10 +27,9 @@
                   </div>
                 </td>
                 <td>
-                  <template v-if="entry.type=='packed'" v-for="checkboxid in gaming()">
-                    <!---
-                    <label class="mw-enhancedchanges-arrow-space-2 mw-enhancedchanges-arrow-space" :for="`mw-checkbox-${checkboxid}`"></label>
-                    -->
+                  <template v-if="entry.type == 'packed' || entry.type == 'logpack'" v-for="checkboxid in gaming()">
+                    <label class="mw-enhancedchanges-arrow mw-enhancedchanges-arrow-space"
+                      :for="`mw-checkbox-${checkboxid}`"></label>
                     <input type="checkbox" :id="`mw-checkbox-${checkboxid}`" class="mw-enhancedchanges-checkbox">
                   </template>
                   <span class="mw-enhancedchanges-arrow-space" v-else></span>
@@ -46,7 +45,7 @@
                     <abbr class="minoredit">m</abbr>
                   </template>
                   <template v-else>{{ pad }}</template>
-                  {{ pad+pad }}
+                  {{ pad + pad }}
                   <span>
                     {{
                       new Date(entry.timestamp).toISOString().slice(11, 16)
@@ -55,63 +54,105 @@
                   </span>
                 </td>
                 <td class="mw-changeslist-line-inner">
-                  <span class="mw-changeslist-line-inner-articleLink">
-                    <WikiPageLink :title="entry.title" />
-                  </span>
-                  {{ " " }}
-                  <span class="mw-changeslist-line-inner-historyLink">
-                    (<span>
-                      <ULink class="mw-changeslist-diff" v-if="entry.type != 'packed'"
-                        :to="`./${entry.title.replaceAll(' ', '_')}?curid=${entry.pageid}&diff=${entry.revid}&oldid=${entry.old_revid}`">diff</ULink>
-                      <span v-else-if="entry.type == 'packed'">{{ entry.entries.length }} changes</span>
+                  <template v-if="entry.type != 'logpack'">
+                    <span class="mw-changeslist-line-inner-articleLink">
+                      <WikiPageLink :title="entry.title" />
                     </span>
-                    |
-                    <span>
-                      <ULink class="mw-changeslist-history"
-                        :to="`./${entry.title.replaceAll(' ', '_')}?curid=${entry.pageid}&action=history`">hist</ULink>
-                    </span>)
+                    {{ " " }}
+                    <span class="mw-changeslist-line-inner-historyLink holyfuckshutup">
+                      <span>
+                        <ULink class="mw-changeslist-diff" v-if="entry.type != 'packed'"
+                          :to="`./${entry.title.replaceAll(' ', '_')}?curid=${entry.pageid}&diff=${entry.revid}&oldid=${entry.old_revid}`"
+                          >diff</ULink>
+                        <span v-else-if="entry.type == 'packed'">{{ entry.entries.length }} changes</span>
+                      </span>
+                      |
+                      <span>
+                        <ULink class="mw-changeslist-history"
+                          :to="`./${entry.title.replaceAll(' ', '_')}?curid=${entry.pageid}&action=history`">hist</ULink>
+                      </span>
+                    </span>
+                    <span class="mw-changeslist-separator"></span>
+                    <span class="mw-changeslist-line-inner-characterDiff">
+                      <span
+                        :class="[`mw-plusminus-${entry.diff > 0 ? 'pos' : entry.diff < 0 ? 'neg' : 'null'}`, 'mw-diff-bytes']"
+                        dir="ltr">
+                        {{ entry.diff > 0 ? "+" : "" }}{{ entry.diff }}
+                      </span>
+                    </span>
+                  </template>
+                  <span v-else class="holyfuckshutup">
+                    <WikiPageLink :title="`Special:Log/${entry.logtype}`" :label="logTypeMap[entry.logtype]" />
                   </span>
                   <span class="mw-changeslist-separator"></span>
-                  <span class="mw-changeslist-line-inner-characterDiff"><span
-                      :class="[`mw-plusminus-${entry.diff > 0 ? 'pos' : entry.diff < 0 ? 'neg' : 'null'}`, 'mw-diff-bytes']"
-                      dir="ltr">
-                      {{ entry.diff > 0 ? "+" : "" }}{{ entry.diff }}
-                    </span></span>
-                  <span class="mw-changeslist-separator"></span>
-                  <span v-if="entry.type != 'packed'">
+                  <span v-if="entry.type != 'packed' && entry.type != 'logpack'">
                     <span class="mw-changeslist-line-inner-userLink">
                       <WikiPageLink :title="`User:${entry.user}`" :label="entry.user" />
                     </span>
                     {{ " " }}
                     <span>
                       (<span>
-                      <WikiPageLink :title="`Message_Wall:${entry.user}`" label="Message Wall" />
+                        <WikiPageLink :title="`Message_Wall:${entry.user}`" label="Message Wall" />
                       </span>
                       |
                       <span>
-                      <WikiPageLink :title="`Special:Contributions/${entry.user}`" label="contribs" />
+                        <WikiPageLink :title="`Special:Contributions/${entry.user}`" label="contribs" />
                       </span>)
                     </span>
+                    <WikiPageLogDesc v-if="entry.type == 'log'" :log="{type: entry.logtype, title: entry.title, params: entry.logparams}"/>
+                    <span class="holyfuckshutup" style="font-style: italic" v-html="fixAnchorUrl(entry.parsedcomment)" v-if="entry.parsedcomment !== ''"></span>
                   </span>
                   <span class="changedby packed" v-else>
                     <template v-for="(c, idx) in entry.contributors">
                       <WikiPageLink :title="`User:${c.user}`" :label="c.user" />
-                      <span> ({{ c.edits }}x)</span>
-                      <span v-if="idx < entry.contributors.length-1">, </span>
+                      <span v-if="c.edits != 1"> ({{ c.edits }}x)</span>
+                      <span v-if="idx < entry.contributors.length - 1">; </span>
                     </template>
                   </span>
                 </td>
               </tr>
-              <tr class="mw-rcfilters-ui-highlights-enhanced-nested" v-if="entry.type == 'packed'" v-for="e in entry.entries">
+              <tr class="mw-rcfilters-ui-highlights-enhanced-nested"
+                v-if="entry.type == 'packed' || entry.type == 'logpack'" v-for="e in entry.entries">
                 <td></td>
                 <td></td>
                 <td></td>
                 <td class="mw-enhanced-rc"></td>
                 <td></td>
                 <td class="mw-enhanced-rc-nested">
-                  <ULink>{{
-                    new Date(e.timestamp).toISOString().slice(11, 16)
-                  }}</ULink>
+                  <template v-if="entry.type == 'packed'">
+                    <ULink :to="`./${e.title.replaceAll(' ', '_')}?curid=${e.pageid}&oldid=${e.old_revid}`">{{
+                      new Date(e.timestamp).toISOString().slice(11, 16)
+                      }}</ULink>
+                    <span class="mw-changeslist-separator"></span>
+                    <span class="mw-changeslist-line-inner-characterDiff">
+                      <span
+                        :class="[`mw-plusminus-${e.diff > 0 ? 'pos' : e.diff < 0 ? 'neg' : 'null'}`, 'mw-diff-bytes']"
+                        dir="ltr">
+                        {{ e.diff > 0 ? "+" : "" }}{{ e.diff }}
+                      </span>
+                    </span>
+                  </template>
+                  <span class="mw-enhanced-rc-time" v-else>{{
+                      new Date(e.timestamp).toISOString().slice(11, 16)
+                      }}</span>
+                  <span class="mw-changeslist-separator"></span>
+                  <span>
+                    <span class="mw-changeslist-line-inner-userLink">
+                      <WikiPageLink :title="`User:${e.user}`" :label="e.user" />
+                    </span>
+                    {{ " " }}
+                    <span>
+                      (<span>
+                        <WikiPageLink :title="`Message_Wall:${e.user}`" label="Message Wall" />
+                      </span>
+                      |
+                      <span>
+                        <WikiPageLink :title="`Special:Contributions/${e.user}`" label="contribs" />
+                      </span>)
+                    </span>
+                    <WikiPageLogDesc v-if="e.type == 'log'" :log="{type: e.logtype, title: e.title, params: e.logparams}"/>
+                    <span class="holyfuckshutup" style="font-style: italic" v-html="fixAnchorUrl(e.parsedcomment)" v-if="e.parsedcomment !== ''"></span>
+                  </span>
                 </td>
               </tr>
             </tbody>
@@ -133,6 +174,59 @@ const { entries: data } = defineProps<{
   entries: Query.objs.HistoryEntry[]
 }>();
 
+function fixAnchorUrl(html: string) {
+  return html.replace(/<a\s+([^>]*?)href="\/wiki\/([^"]+)"([^>]*)>/g, (match, pre, path, post) => {
+    // Add class 'miraiwiki-raw-link' to the anchor
+    let classAttrMatch = pre.match(/class\s*=\s*["']([^"']*)["']/);
+    if (classAttrMatch) {
+      // Append to existing class
+      const newClass = classAttrMatch[1] + ' miraiwiki-raw-link';
+      pre = pre.replace(/class\s*=\s*["'][^"']*["']/, `class="${newClass}"`);
+    } else {
+      // Add new class attribute
+      pre += ` class="miraiwiki-raw-link"`;
+    }
+    return `<a ${pre}href="./${path}"${post}>`;
+  });
+}
+
+if (import.meta.client) {
+  onMounted(() => {
+    document.querySelectorAll('a.miraiwiki-raw-link').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = (el as HTMLAnchorElement).getAttribute('href');
+        if (href) {
+          navigateTo(href);
+        }
+      });
+    });
+  });
+}
+
+const logTypeMap: Record<string, string> = {
+  "": "Main public logs",
+  "abusefilter": "Abuse filter log",
+  "block": "Block log",
+  "abusefilterblockeddomainhit": "Blocked domains hit log",
+  "contentmodel": "Content model change log",
+  "delete": "Deletion log",
+  "import": "Import log",
+  "merge": "Merge log",
+  "move": "Move log",
+  "create": "Page creation log",
+  "patrol": "Patrol log",
+  "protect": "Protection log",
+  "tag": "Tag log",
+  "managetags": "Tag management log",
+  "templateclassification": "Template type",
+  "thanks": "Thanks log",
+  "upload": "Upload log",
+  "newusers": "User creation log",
+  "renameuser": "User rename log",
+  "rights": "User rights log"
+}
+
 const pad = " "
 
 function gaming() {
@@ -140,6 +234,9 @@ function gaming() {
 }
 
 interface HistoryEntry2 extends Query.objs.HistoryEntry {
+  diff: number;
+}
+interface LogHistoryEntry2 extends Query.objs.LogHistoryEntry {
   diff: number;
 }
 
@@ -151,23 +248,41 @@ type PackedChanges = {
     user: string,
     edits: number
   }[],
-  new:boolean,
+  new: boolean,
   minor: false,
+  bot: false,
   /// the timestamp of the latest change
   timestamp: string,
   /// the total size of the changes
   diff: number
   entries: HistoryEntry2[]
 }
+interface LogsPack {
+  type: "logpack",
+  logtype: string,
+  /// The display name of the log type
+  title: string,
+  /// the timestamp of the latest change
+  timestamp: string,
+  contributors: {
+    user: string,
+    edits: number
+  }[],
+  new: false,
+  minor: false,
+  bot: false,
+  entries: LogHistoryEntry2[]
+}
+type FourHorsemensOfLogs = HistoryEntry2 | LogHistoryEntry2 | PackedChanges | LogsPack;
 const groupedEntries = computed(() => {
-  const groups: Record<string, (HistoryEntry2 | PackedChanges)[]> = {};
+  const groups: Record<string, (FourHorsemensOfLogs)[]> = {};
   // first pass: group by date
   for (const entry of data) {
     const date = entry.timestamp.split('T')[0]!;
     if (!groups[date]) {
       groups[date] = [];
     }
-    groups[date].push({...entry, diff: entry.newlen-entry.oldlen});
+    groups[date].push({ ...entry, diff: entry.newlen - entry.oldlen });
   }
   /** second pass: pack entries by the consecutive edits of a page
   e.g: 
@@ -180,24 +295,78 @@ const groupedEntries = computed(() => {
     HistoryEntry2 (title: "impostor - amogus", pageid: 123426) - standalone
   ]
   */
-  for (const [date, entries] of Object.entries(groups)) {
-    const packed: (HistoryEntry2 | PackedChanges)[] = [];
+  for (const [date, entries] of Object.entries(groups as Record<string, (HistoryEntry2 | LogHistoryEntry2)[]>)) {
+    const packed: (FourHorsemensOfLogs)[] = [];
+    const used = new Array(entries.length).fill(false);
+
+    // Helper to find next unused index
+    function nextUnused(start: number) {
+      for (let i = start; i < entries.length; i++) {
+        if (!used[i]) return i;
+      }
+      return entries.length;
+    }
+
     let i = 0;
     while (i < entries.length) {
+      i = nextUnused(i);
+      if (i >= entries.length) break;
       const start = i;
       const cur = entries[i]!;
-      // Find consecutive entries with same title and pageid
-      let j = i + 1;
-      while (
-        j < entries.length &&
-        entries[j]!.title === cur.title &&
-        entries[j]!.pageid === cur.pageid
-      ) {
-        j++;
+
+      // Handle log grouping first
+      if (cur.type === 'log') {
+        const logtype = cur.logtype;
+        const logEntries: LogHistoryEntry2[] = [];
+        for (let j = 0; j < entries.length; j++) {
+          if (
+            !used[j] &&
+            entries[j]!.type === 'log' &&
+            (entries[j]! as LogHistoryEntry2).logtype === logtype
+          ) {
+            logEntries.push(entries[j] as LogHistoryEntry2);
+            used[j] = true;
+          }
+        }
+        if (logEntries.length) {
+          packed.push({
+            type: "logpack",
+            logtype,
+            title: (cur as any).title || logtype,
+            timestamp: logEntries[0]!.timestamp,
+            contributors: (() => {
+              const map: Record<string, number> = {};
+              for (const e of logEntries) {
+                map[(e as any).user] = (map[(e as any).user] || 0) + 1;
+              }
+              return Object.entries(map).map(([user, edits]) => ({
+                user,
+                edits,
+              }));
+            })(),
+            entries: logEntries,
+            new: false,
+            minor: false,
+            bot: false
+          });
+        }
+        continue;
       }
-      if (j - start > 1) {
-        // Pack them
-        const packedEntries = entries.slice(start, j) as HistoryEntry2[];
+
+      // Pack all unused entries with same title and pageid
+      const packedEntries: HistoryEntry2[] = [];
+      for (let j = 0; j < entries.length; j++) {
+        if (
+          !used[j] &&
+          entries[j]!.type !== 'log' &&
+          entries[j]!.title === cur.title &&
+          entries[j]!.pageid === cur.pageid
+        ) {
+          packedEntries.push(entries[j] as HistoryEntry2);
+          used[j] = true;
+        }
+      }
+      if (packedEntries.length > 1) {
         packed.push({
           type: "packed",
           title: cur.title,
@@ -214,15 +383,15 @@ const groupedEntries = computed(() => {
           })(),
           new: packedEntries.some(e => e.new),
           minor: false,
+          bot: false,
           timestamp: packedEntries[0]!.timestamp,
           diff: packedEntries.reduce((sum, e) => sum + e.diff, 0),
           entries: packedEntries,
         });
-        i = j;
-      } else {
-        packed.push(cur);
-        i++;
+      } else if (packedEntries.length === 1) {
+        packed.push(packedEntries[0]!);
       }
+      // i will be incremented by nextUnused
     }
     groups[date] = packed;
   }
@@ -234,25 +403,39 @@ const groupedEntries = computed(() => {
 .changedby.packed::before {
   content: "["
 }
+
 .changedby.packed::after {
   content: "]"
 }
-.mw-enhancedchanges-checkbox {
+
+.holyfuckshutup::before {
+  content: "("
+}
+
+.holyfuckshutup::after {
+  content: ")"
+}
+
+.mw-enhancedchanges-arrow {
   mask-image: url("data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"%23000000\"><path d=\"M10 15 2 5h16z\"/></svg>");
-  background-color: white;
+  mask-size: calc(max(0.75em, 12px));
+  mask-repeat: no-repeat;
+  mask-position: center;
+  background-color: #72777d;
   width: 15px;
   height: 15px;
 }
 
-[dir="ltr"] .mw-enhancedchanges-checkbox:not(:checked) + .mw-enhancedchanges-arrow {
-	transform: rotate(-90deg);
+.mw-enhancedchanges-arrow:has(+ .mw-enhancedchanges-checkbox:not(:checked)) {
+  transform: rotate(-90deg);
 }
 
 /*this rule doesnt work anyway*/
-.mw-enhancedchanges-checkbox:not(:checked) + * .mw-rcfilters-ui-highlights-enhanced-nested {
-	display: unset !important;
+.mw-enhancedchanges-checkbox:not(:checked)+* .mw-rcfilters-ui-highlights-enhanced-nested {
+  display: unset !important;
 }
-.mw-changeslist-line > tbody:has(tr:first-child > td:nth-child(2) > .mw-enhancedchanges-checkbox:not(:checked)) > tr.mw-rcfilters-ui-highlights-enhanced-nested  {
+
+.mw-changeslist-line>tbody:has(tr:first-child > td:nth-child(2) > .mw-enhancedchanges-checkbox:not(:checked))>tr.mw-rcfilters-ui-highlights-enhanced-nested {
   display: none;
 }
 </style>

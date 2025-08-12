@@ -132,8 +132,12 @@ const { data: data } = await useFetch(
     sliders.find(".fandom-slider__nav__caption div:first-child").addClass("miraiwiki-slider__caption-cur");
     //includeWDSIcons = true;
   }
-  if (sliders.length != 0 || $("div.wikia-gallery").length != 0) {
+  const slideshowCount = $("div.wikia-slideshow").length;
+  if (sliders.length != 0 || $("div.wikia-gallery").length != 0 || slideshowCount != 0) {
     extraSheets.push('ext.fandom.photoGallery.gallery.css')
+  }
+  if (slideshowCount != 0) {
+    extraSheets.push('ext.fandom.photoGallery.slideshow.css')
   }
   if (extraSheets.length != 0) {
     const { addSheet } = useSheets();
@@ -229,6 +233,63 @@ onMounted(() => {
       sliderCaptions.querySelector(`div[data-index="${idx}"]`)!.classList.add("miraiwiki-slider__caption-cur")
     }, 8000)
   }
+  // gallery slideshow (which is simpler actually)
+  // div.wikia-slideshow-wrapper
+  // - wikia-slideshow-prev-next
+  // - - a.wikia-slideshow-prev
+  // - - a.wikia-slideshow-next
+  // - div.wikia-slideshow-images-wrapper
+  // - - ul.wikia-slideshow-images 
+  // - - - li.wikia-slideshow-current
+  // - - - li
+  // - - - li
+  // similar to gallery slider but without autoseek and data-index (its placed where it should be nor do we care about it)
+  for (const slideshow of contentNode.querySelectorAll("div.wikia-slideshow-wrapper")) {
+    const imagesWrapper = slideshow.querySelector(".wikia-slideshow-images-wrapper");
+    if (!imagesWrapper) continue;
+    const imagesList = imagesWrapper.querySelector("ul.wikia-slideshow-images");
+    if (!imagesList) continue;
+    const slides = imagesList.querySelectorAll("li");
+    let currentIdx = 0;
+
+    // Find the counter element
+    const counter = slideshow.querySelector(
+      "div.wikia-slideshow-toolbar > div > span.wikia-slideshow-toolbar-counter"
+    );
+
+    function showSlide(idx: number) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle("wikia-slideshow-current", i === idx);
+      });
+      currentIdx = idx;
+      // Update counter text
+      if (counter) {
+        counter.textContent = `${idx + 1}/${slides.length}`;
+      }
+    }
+
+    // Initial display
+    showSlide(currentIdx);
+
+    // Prev/Next controls
+    const prevBtn = slideshow.querySelector(".wikia-slideshow-prev");
+    const nextBtn = slideshow.querySelector(".wikia-slideshow-next");
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const idx = (currentIdx - 1 + slides.length) % slides.length;
+        showSlide(idx);
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const idx = (currentIdx + 1) % slides.length;
+        showSlide(idx);
+      });
+    }
+  }
 
   // file viewer modal handler
   const overlay = useOverlay();
@@ -295,5 +356,17 @@ table.mw-collapsible button.mw-collapsible-toggle[aria-expanded=false] > span.mw
 }
 table.mw-collapsible:has(tbody > tr:first-child > th > button.mw-collapsible-toggle[aria-expanded=false]) > tbody > tr:last-child {
   display: none;
+}
+
+ul.wikia-slideshow-images > li {
+  opacity: 0;
+  transition: opacity 0.4s;
+  display: none !important;
+}
+
+ul.wikia-slideshow-images > li.wikia-slideshow-current {
+  opacity: 1;
+  display: block !important;
+  transition: opacity 0.4s;
 }
 </style>

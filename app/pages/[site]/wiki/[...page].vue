@@ -5,6 +5,7 @@
         <template v-for="sheet in sheets">
           <link rel="stylesheet" v-bind:href="`/api/wikiassets/${site}/style?variant=${currentTheme.toLowerCase()}&${sheet}`">
         </template>
+        <div v-html="svgText"></div>
       </div>
       <div
         :class="`theme-fandomdesktop-${currentTheme.toLowerCase()} fandomdesktop-background skin-fandomdesktop ooui-theme-fandomooui mw-rcfilters-ui-initialized`">
@@ -72,15 +73,18 @@ import { useSheets } from '#imports';
 import { WikiPageCategory, WikiPageMain, WikiPageSpecial, WikiPageUser } from '#components';
 import type { ShallowRef } from 'vue';
 import type { API, Query } from '~~/shared/types/actionapi';
-if (import.meta.dev) {
-  onMounted(()=>{
+onMounted(()=>{
+  if (import.meta.dev) {
     const toast = useToast()
   // todo: this reveals that nuxt in fact reloads the page again if i replace the wiki page as a redirect
     toast.add({
       title: "Hydration completed"
     })
-  })
-}
+  }
+})
+
+const res = await useFetch<Blob>("/wds.svg");
+const svgText = await res.data.value?.text();
 
 function pageComponentForNamespace(ns: string): any {
   return (

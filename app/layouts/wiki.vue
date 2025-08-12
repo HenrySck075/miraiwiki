@@ -12,9 +12,7 @@
       <UButton icon="mdi:github" to="https://github.com/HenrySck075/miraiwiki" variant="ghost" color="neutral" title="Source code"></UButton>
       <Search>
       </Search>
-      <UDropdownMenu :items="themeItems">
-        <UButton :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
-      </UDropdownMenu>
+      <UButton @click="currentTheme = currentTheme == 'dark' ? 'light' : 'dark'" :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
     </div>
     <div id="miraiwiki-content" class="overflow-y-scroll">
       <slot></slot>
@@ -40,10 +38,10 @@ type mope = {
     children?: mope[]
 }
 
-const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
+const currentTheme = useCookie("theme", { "default": () => "dark", watch: "shallow" });
 const themeItems = [
-  { label: "Light", icon: "mdi:white-balance-sunny", onSelect: () => { currentTheme.value = "Light"; } },
-  { label: "Dark", icon: "mdi:weather-night", onSelect: () => { currentTheme.value = "Dark"; } },
+  { label: "light", icon: "mdi:white-balance-sunny", onSelect: () => { currentTheme.value = "light"; } },
+  { label: "dark", icon: "mdi:weather-night", onSelect: () => { currentTheme.value = "dark"; } },
   //{label: "System"}
 ]
 const route = useRoute();
