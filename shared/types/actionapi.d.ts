@@ -349,6 +349,11 @@ export namespace Query {
         img_sha1: string,
         img_timestamp: string
       }>;
+
+      export type Everything = (
+        Create |
+        Upload
+      )
     }
     export interface HistoryEntry {
       type: "edit" | "new" | "external" | "categorize";
@@ -403,7 +408,7 @@ export namespace Query {
       }
     };
     export interface LogEvents {
-      logevents: objs.LogEvent[]
+      logevents: objs.LogEvent.Everything[]
     }
     export interface RecentChanges {
       recentchanges: objs.HistoryEntry[];

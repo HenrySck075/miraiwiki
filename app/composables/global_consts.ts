@@ -1,0 +1,22 @@
+export const logTypeMap: Record<string, string> = {
+  "": "Main public logs",
+  "abusefilter": "Abuse filter log",
+  "block": "Block log",
+  "abusefilterblockeddomainhit": "Blocked domains hit log",
+  "contentmodel": "Content model change log",
+  "delete": "Deletion log",
+  "import": "Import log",
+  "merge": "Merge log",
+  "move": "Move log",
+  "create": "Page creation log",
+  "patrol": "Patrol log",
+  "protect": "Protection log",
+  "tag": "Tag log",
+  "managetags": "Tag management log",
+  "templateclassification": "Template type",
+  "thanks": "Thanks log",
+  "upload": "Upload log",
+  "newusers": "User creation log",
+  "renameuser": "User rename log",
+  "rights": "User rights log"
+}

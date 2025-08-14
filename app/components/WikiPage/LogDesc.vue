@@ -129,7 +129,7 @@ function renderLog() {
 </script>
 
 <template>
-  <span>
+  <span v-once>
     <template v-for="(part, i) in renderLog()" :key="i">
       <component v-if="typeof part === 'object' && part !== null" :is="part" />
       <template v-else>{{ part }}</template>

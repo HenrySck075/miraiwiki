@@ -1,5 +1,9 @@
 <template>
-    <ULink :to="`./${title.replaceAll(' ', '_')}`">{{ label ?? title }}</ULink>
+    <ULink :to="`./${title.replaceAll(' ', '_')}`">
+        <slot>
+        {{ label ?? title }}
+        </slot>
+    </ULink>
 </template>
 
 <script setup lang="ts">

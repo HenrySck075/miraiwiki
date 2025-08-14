@@ -1,12 +1,21 @@
 <template>
   <div id="special-page">
-    <component :is="getComponentForSpecialPage()" :site="site" v-if="!qpPages.includes(specialPage.toLowerCase())"></component>
-    <WikiPageSpecialQPBased :type="specialPage" v-else/>
+    <component :is="getComponentForSpecialPage()" :site="site" v-if="!qpPages.includes(specialPage.toLowerCase())">
+    </component>
+    <WikiPageSpecialQPBased :type="specialPage" v-else />
   </div>
 </template>
 
 <script setup lang="ts">
-import { WikiPageSpecialAllPages, WikiPageSpecialRandom, WikiPageSpecialRecentChanges, WikiPageSpecialSPList } from '#components';
+import { 
+  WikiPageSpecialAllPages, 
+  WikiPageSpecialRandom, 
+  WikiPageSpecialRandomPlus, 
+  WikiPageSpecialRandomRoot, 
+  WikiPageSpecialLog, 
+  WikiPageSpecialRecentChanges, 
+  WikiPageSpecialSPList 
+} from '#components';
 
 const { site, page } = defineProps<{
   site: string,
@@ -17,7 +26,7 @@ const specialPage = removePrefix(page, "Special:").trim()
 
 
 if (specialPage === "ApiSandbox") {
-  await navigateTo(`https://${site}.fandom.com/wiki/Special:ApiSandbox`, {external: true});
+  await navigateTo(`https://${site}.fandom.com/wiki/Special:ApiSandbox`, { external: true });
 }
 
 useSheets().addSheet("modules=skin.fandomdesktop.SpecialPageGlobal.css");
@@ -65,9 +74,12 @@ const qpPages = [
 
 function getComponentForSpecialPage() {
   return specialPage === "AllPages" ? WikiPageSpecialAllPages :
-  specialPage === "SpecialPages" ? WikiPageSpecialSPList :
-  specialPage === "Random" ? WikiPageSpecialRandom :
-  specialPage === "RecentChanges" ? WikiPageSpecialRecentChanges :
+    specialPage === "SpecialPages" ? WikiPageSpecialSPList :
+    specialPage === "Random" ? WikiPageSpecialRandom :
+    specialPage === "RandomRedirect" ? WikiPageSpecialRandomPlus :
+    specialPage === "RandomRootpage" ? WikiPageSpecialRandomRoot :
+    specialPage.startsWith("Log") ? WikiPageSpecialLog :
+    specialPage === "RecentChanges" ? WikiPageSpecialRecentChanges :
     'div';
 }
 </script>

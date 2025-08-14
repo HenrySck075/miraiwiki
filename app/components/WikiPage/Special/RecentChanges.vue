@@ -50,14 +50,14 @@ const { addSheet } = useSheets();
 addSheet(`modules=mediawiki.feedlink,helplink|mediawiki.interface.helpers.styles|mediawiki.rcfilters.filters.base.styles|mediawiki.special.changeslist|mediawiki.special.changeslist.enhanced,legend|mediawiki.widgets.styles|skin.fandomdesktop.RecentChanges.css`);
 
 function joke() {
-  useWikiFetch<API.Response<[
+  return useWikiFetch<API.Response<[
   Query.Query<[
     Query.list.RecentChanges
   ]>
 ]>>("/uncached/query", {
     query: {
       "list": "recentchanges",
-      "rclimit": limit,
+      "rclimit": limit.value,
       "rcprop": "title|timestamp|ids|parsedcomment|sizes|loginfo|flags|comment|user"
     }
   }).then((v)=>data.value = v.data.value.query.recentchanges.filter((v)=>new Date(v.timestamp).getTime() >= Date.now()-days.value*8.64e+7))
