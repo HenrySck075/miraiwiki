@@ -1,8 +1,8 @@
 <template>
-    {{ files }}
+    <UButton>hi</UButton>
 </template>
 
 
 <script setup lang="ts">
-const files = useAssets();
+useAppConfig().ui.colors.primary = "";
 </script>

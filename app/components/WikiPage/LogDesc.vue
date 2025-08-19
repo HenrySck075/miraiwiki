@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { defineProps, h } from 'vue';
-import { z } from 'zod';
+import { h } from 'vue';
 import Link from './Link.vue';
-
+import type { Query } from '~~/shared/types/actionapi';
+import LogUserInfo from './LogUserInfo.vue';
+/*
+import { z } from 'zod';
 // Zod schemas for log event params
 const BlockParams = z.object({
   duration: z.string(),
@@ -39,44 +41,50 @@ const UploadParams = z.object({
   img_sha1: z.string(),
   img_timestamp: z.string()
 });
+*/
 
 const props = defineProps<{
   log: {
     title: string;
     params: any;
     type: string;
+    action: string;
   }
 }>();
-
 function renderLog() {
-  const { log } = props;
-  const params = log.params;
+  const { log } = props as ({log: Query.objs.LogEvent.Everything});
   switch (log.type) {
-    case 'block':
-    case 'reblock': {
-      const parsed = BlockParams.safeParse(params);
-      if (!parsed.success) return h('span', 'blocked (invalid params)');
-      return [
-        'blocked ',
-        h(Link, { title: log.title }),
-        ' with an expiration time of ',
-        parsed.data.duration
-      ];
+    case 'block': {
+      switch (log.action) {
+        case 'block':
+        case 'reblock': {
+          //if (!parsed.success) return h('span', 'blocked (invalid params)');
+          return [
+            'blocked ',
+            h(LogUserInfo, { user: log.title.replace("User:", "") }),
+            ' with an expiration time of ',
+            log.params.duration
+          ];
+        }
+        case 'unblock':
+          return [
+            'unblocked ',
+            h(LogUserInfo, { user: log.title.replace("User:", "") })
+          ];
+      }
     }
-    case 'unblock':
-      return [
-        'unblocked ',
-        h(Link, { title: log.title })
-      ];
     case 'move': {
-      const parsed = MoveParams.safeParse(params);
-      if (!parsed.success) return h('span', 'moved (invalid params)');
-      return [
-        'moved ',
-        h(Link, { title: log.title }),
-        ' to ',
-        h(Link, { title: parsed.data.target_title })
-      ];
+      // ok?????
+      try {
+        return [
+          'moved ',
+          h(Link, { title: log.title }),
+          ' to ',
+          h(Link, { title: log.params.target_title })
+        ];
+      } catch (e) {
+        return h('span', 'moved (invalid params)');
+      }
     }
     case 'delete':
       return [
@@ -89,19 +97,32 @@ function renderLog() {
         h(Link, { title: log.title })
       ];
     case 'protect': {
-      const parsed = ProtectParams.safeParse(params);
-      if (!parsed.success) return h('span', 'protected (invalid params)');
+      //const parsed = ProtectParams.safeParse(params);
+      //if (!parsed.success) return h('span', 'protected (invalid params)');
+      const params = log.params;
       return [
         'protected ',
         h(Link, { title: log.title }),
-        parsed.data.cascade ? ' (cascading) ' : ' ',
-        parsed.data.description,
-        parsed.data.details?.length ? ` (${parsed.data.details.map(d => d.level).join(', ')})` : ''
+        params.cascade ? ' (cascading) ' : ' ',
+        params.description,
+        params.details?.length ? ` (${params.details.map(d => d.level).join(', ')})` : ''
+      ];
+    }
+    case 'patrol': {
+      //const parsed = PatrolParams.safeParse(params);
+      //if (!parsed.success) return h('span', 'patrolled (invalid params)');
+      return [
+        log.params.auto ? 'automatically ' : '',
+        'marked revision ',
+        log.params.curid,
+        ' of page ',
+        h(Link, { title: log.title }),
+        ' patrolled'
       ];
     }
     case 'upload': {
-      const parsed = UploadParams.safeParse(params);
-      if (!parsed.success) return h('span', 'uploaded (invalid params)');
+      //const parsed = UploadParams.safeParse(params);
+      //if (!parsed.success) return h('span', 'uploaded (invalid params)');
       return [
         'uploaded ',
         h(Link, { title: log.title })
@@ -110,7 +131,7 @@ function renderLog() {
     case 'thanks':
       return [
         'thanked ',
-        h(Link, { title: log.title })
+        h(LogUserInfo, { user: log.title.replace("User:", "") })
       ];
     case 'abusefilter':
       return [
@@ -122,8 +143,10 @@ function renderLog() {
         'abusefilter protected vars event on ',
         h(Link, { title: log.title })
       ];
+    case 'newusers':
+      return ["was created"];
     default:
-      return [log.type, ' log on ', h(Link, { title: log.title })];
+      return [log.type, '/', log.action, ' log on ', h(Link, { title: log.title })];
   }
 }
 </script>

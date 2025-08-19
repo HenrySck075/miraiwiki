@@ -1,6 +1,6 @@
 <template>
   <div id="special-page">
-    <component :is="getComponentForSpecialPage()" :site="site" v-if="!qpPages.includes(specialPage.toLowerCase())">
+    <component :is="getComponentForSpecialPage()" :site="site" :params="page.params" v-if="!qpPages.includes(specialPage.toLowerCase())">
     </component>
     <WikiPageSpecialQPBased :type="specialPage" v-else />
   </div>
@@ -16,13 +16,14 @@ import {
   WikiPageSpecialRecentChanges, 
   WikiPageSpecialSPList 
 } from '#components';
+import type { MiraiWiki } from '~~/shared/types/miraiwiki';
 
 const { site, page } = defineProps<{
   site: string,
-  page: string
+  page: MiraiWiki.absymal
 }>();
 
-const specialPage = removePrefix(page, "Special:").trim()
+const specialPage = removePrefix(page.page, "Special:").trim()
 
 
 if (specialPage === "ApiSandbox") {
@@ -78,7 +79,7 @@ function getComponentForSpecialPage() {
     specialPage === "Random" ? WikiPageSpecialRandom :
     specialPage === "RandomRedirect" ? WikiPageSpecialRandomPlus :
     specialPage === "RandomRootpage" ? WikiPageSpecialRandomRoot :
-    specialPage.startsWith("Log") ? WikiPageSpecialLog :
+    specialPage === "Log" ? WikiPageSpecialLog :
     specialPage === "RecentChanges" ? WikiPageSpecialRecentChanges :
     'div';
 }

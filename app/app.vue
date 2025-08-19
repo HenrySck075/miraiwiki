@@ -33,4 +33,11 @@ body, html, #__nuxt {
   width: 100%;
   height: 100%;
 }
+
+.brackets::before {
+  content: "("
+}
+.brackets::after {
+  content: ")"
+}
 </style>

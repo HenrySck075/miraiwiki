@@ -14,7 +14,7 @@
             style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
           <div class="resizable-container">
             <component :is="pageComponentForNamespace(getPageNamespace(page))" :site="site"
-              :page="page"></component>
+              :page="pageWithParams"></component>
             <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"
               style="margin-top: 8px" ref="commentsNode" v-if="['Main'].includes(getPageNamespace(page))">
               <template v-if="comments">
@@ -102,6 +102,11 @@ if ((route.params.site! as string).endsWith(".fandom.com")) {
 }
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 
+// first item is the page and everything else is the params
+const pageWithParams = {
+  page: (route.params.page as string[])[0],
+  params: (route.params.page as string[]).slice(1)
+};
 const page = (route.params.page as string[]).join("/")
 const site = route.params.site as string;
 if (site.includes(".")) {
@@ -189,7 +194,7 @@ useHead({
       rel: 'license',
       /// tee hee
       href: 'https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License'
-    }
+    },
   ],
   /// TODO: no mediawiki engine object we need to do this ourselves
   /*

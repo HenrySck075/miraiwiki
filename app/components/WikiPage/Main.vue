@@ -13,7 +13,7 @@
               :title="`Category:${cat.category.replaceAll('_', ' ')}`">
               {{ cat.category.replaceAll("_", " ") }}
             </a>
-            <span v-if="idx < 6">, </span>
+            <span v-if="idx < 6 && idx < data.parse.categories.length-1">, </span>
           </template>
           <template v-if="data.parse.categories.length > 6">
             <template v-for="(cat, idx) in data.parse.categories.slice(6, 8)"
@@ -55,17 +55,13 @@
 
 <script setup lang="ts">
 
-const {site, page} = defineProps<{
+const {site, page: pageWithParams} = defineProps<{
   site: string,
-  page: string
+  page: MiraiWiki.absymal
 }>();
 
-const emit = defineEmits<{
-  sheetAdd: [string]
-}>();
+const page = [pageWithParams.page, ...pageWithParams.params].join("/");
 
-
-import { modal } from '#build/ui';
 import { FileViewerModal } from '#components';
 import * as cheerio from 'cheerio';
 import { Element as SElement } from 'domhandler';
@@ -150,6 +146,7 @@ const { data: data } = await useFetch(
 
 const content = useTemplateRef("content");
 import { useSheets } from '#imports';
+import type { MiraiWiki } from '~~/shared/types/miraiwiki';
 onMounted(() => {
   //customElements.define("miraiwiki-audio", defineCustomElement(FAudio))
 

@@ -86,20 +86,8 @@
                   </span>
                   <span class="mw-changeslist-separator"></span>
                   <span v-if="entry.type != 'packed' && entry.type != 'logpack'">
-                    <span class="mw-changeslist-line-inner-userLink">
-                      <WikiPageLink :title="`User:${entry.user}`" :label="entry.user" />
-                    </span>
-                    {{ " " }}
-                    <span>
-                      (<span>
-                        <WikiPageLink :title="`Message_Wall:${entry.user}`" label="Message Wall" />
-                      </span>
-                      |
-                      <span>
-                        <WikiPageLink :title="`Special:Contributions/${entry.user}`" label="contribs" />
-                      </span>)
-                    </span>
-                    <WikiPageLogDesc v-if="entry.type == 'log'" :log="{type: entry.logtype, title: entry.title, params: entry.logparams}"/>
+                    <WikiPageLogUserInfo :user="entry.user" />
+                    <WikiPageLogDesc v-if="entry.type == 'log'" :log="{type: entry.logtype, action: entry.logaction, title: entry.title, params: entry.logparams}"/>
                     <span class="holyfuckshutup" style="font-style: italic" v-html="fixAnchorUrl(entry.parsedcomment)" v-if="entry.parsedcomment !== ''"></span>
                   </span>
                   <span class="changedby packed" v-else>
@@ -150,7 +138,7 @@
                         <WikiPageLink :title="`Special:Contributions/${e.user}`" label="contribs" />
                       </span>)
                     </span>
-                    <WikiPageLogDesc v-if="e.type == 'log'" :log="{type: e.logtype, title: e.title, params: e.logparams}"/>
+                    <WikiPageLogDesc v-if="e.type == 'log'" :log="{type: e.logtype, action: e.logaction, title: e.title, params: e.logparams}"/>
                     <span class="holyfuckshutup" style="font-style: italic" v-html="fixAnchorUrl(e.parsedcomment)" v-if="e.parsedcomment !== ''"></span>
                   </span>
                 </td>

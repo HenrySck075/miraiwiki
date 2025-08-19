@@ -307,7 +307,7 @@ export namespace Query {
 
       export type Base2<T extends string, PT extends object = {}> = BaseTyped<T, T, PT>
 
-      export type Block = Base2<"block" | "reblock", {
+      export type Block = BaseTyped<"block", "block" | "reblock", {
         duration: string,
         flags: string[],
         restrictions?: {
@@ -344,15 +344,33 @@ export namespace Query {
           cascade: boolean;
         }[];
       }>;
+      export type Patrol = Base2<"patrol", {
+        curid: number,
+        previd: 0, // seemingly unused?
+        auto: boolean
+      }>;
       export type Thank = BaseTyped<"thanks", "thank">;
       export type Upload = Base2<"upload", {
         img_sha1: string,
         img_timestamp: string
       }>;
+      export type NewUser = BaseTyped<"newusers", "create">;
 
       export type Everything = (
         Create |
-        Upload
+        Upload |
+        Move |
+        Delete |
+        Protect |
+        Patrol |
+        Thank |
+        Block |
+        Unblock |
+        NewUser |
+        AFCreate |
+        AFHit |
+        AFModify |
+        AFProtectedVars
       )
     }
     export interface HistoryEntry {

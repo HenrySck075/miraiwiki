@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="p-4">
     <h1>About MiraiWiki</h1>
     <br>
     MiraiWiki is a reimplementation of <ULink href="https://breezewiki.com">BreezeWiki</ULink>, which 

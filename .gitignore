@@ -29,3 +29,6 @@ logs
 mine/
 
 public/indies_*.json
+
+# targeted ignores
+tailwindings.json

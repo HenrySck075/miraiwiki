@@ -129,17 +129,10 @@ type macaroni = API.Response<[
     Query.list.QueryPage
   ]>
 ]>;
-const data = ref<macaroni>();
+const data = shallowRef<macaroni>();
 const amog = useRouter();
-watch([limit, offset], ()=>{
-  data.value = undefined;
-  amog.push({
-    query: {
-      "limit": limit.value.toString(),
-      "offset": offset.value.toString(),
-    }
-  })
-  useWikiFetch<macaroni>("/query", {
+function joker() {
+  return useWikiFetch<macaroni>("/query", {
     query: {
       "list": "querypage",
       "qppage": qppage,
@@ -147,7 +140,23 @@ watch([limit, offset], ()=>{
       "qpoffset": offset
     }
   }).then((v)=>data.value = v.data.value);
+}
+watch([limit, offset], ()=>{
+  data.value = undefined;
+  amog.push({
+    query: {
+      "limit": limit.value.toString(),
+      "offset": offset.value.toString(),
+    }
+  });
+  joker();
 }, {immediate: true});
+
+/*
+if (import.meta.client) {
+  await joker();
+}
+  */
 
 const bob = useWikiMeta();
 useSeoMeta({
