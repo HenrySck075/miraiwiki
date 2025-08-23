@@ -13,6 +13,9 @@
       <Search>
       </Search>
       <UButton @click="currentTheme = currentTheme == 'dark' ? 'light' : 'dark'" :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
+      <SettingsMenu v-model="settingsDialog">
+        <UButton icon="mdi:cog" variant="ghost" color="neutral" title="Settings" @click="settingsDialog = true"></UButton>
+      </SettingsMenu>
     </div>
     <div id="miraiwiki-content" class="overflow-y-scroll">
       <slot></slot>
@@ -111,5 +114,7 @@ const headers = await useFetch(
     },
     ...airth(content)
   ];
-})
+});
+
+const settingsDialog = ref(false);
 </script>

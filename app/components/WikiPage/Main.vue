@@ -2,6 +2,7 @@
   <WikiPageBase>
     <!--cascading slots-->
     <template #top>
+      <component is="script" :src="importsUrl"></component>
       <slot name="top"></slot>
     </template>
     <template #headers>
@@ -55,16 +56,35 @@
 
 <script setup lang="ts">
 
+import { FileViewerModal } from '#components';
+import * as cheerio from 'cheerio';
+import { Element as SElement } from 'domhandler';
+
+import { useSheets } from '#imports';
+import type { MiraiWiki } from '~~/shared/types/miraiwiki';
+import type { API, Parse} from '~~/shared/types/actionapi';
+
 const {site, page: pageWithParams} = defineProps<{
   site: string,
   page: MiraiWiki.absymal
 }>();
 
-const page = [pageWithParams.page, ...pageWithParams.params].join("/");
+const imports = (await useWikiFetch<API.Response<[
+  Parse.Parse<[
+    Parse.prop.Wikitext
+  ]>
+]>>('/parse', {
+  query: {
+    "page": "MediaWiki:ImportJS",
+    "prop": "wikitext"
+  }
+})).data.value.parse.wikitext.split("\n");
 
-import { FileViewerModal } from '#components';
-import * as cheerio from 'cheerio';
-import { Element as SElement } from 'domhandler';
+const route = useRoute();
+const files = imports.map((file)=>file.includes(":") ? `u:${file}` : file).join("|");
+const importsUrl = `/api/wikiassets/${route.params.site}/style?modules=${files}`
+
+const page = [pageWithParams.page, ...pageWithParams.params].join("/");
 
 function updateTree(e: cheerio.Cheerio<SElement>) {
   e.removeAttr("srcset")
@@ -89,6 +109,12 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
       if (elem.attribs["href"]?.startsWith("/wiki/")) {
         /// TODO: more endpoints
         elem.attribs["href"] = elem.attribs["href"]!.replaceAll("/wiki", `/${site}/wiki`)
+      } else if (elem.attribs["href"]) {
+        // try to replace (?:https://)?([a-zA-Z0-9-_]*)\.fandom\.com with /$1
+        const fandomMatch = elem.attribs["href"]!.match(/^(?:https?:\/\/)?([a-zA-Z0-9-_]*)\.fandom\.com(\/.*)?$/);
+        if (fandomMatch) {
+          elem.attribs["href"] = `/${fandomMatch[1]}${fandomMatch[2] ?? ""}`;
+        }
       }
     } else if (elem.tagName == "audio" && elem.attribs["src"]) {
       elem.attribs["src"] = elem.attribs["src"]!.replace("https://", '/api/assets/');
@@ -99,7 +125,6 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
   }
 }
 
-// Remove defineModel, use sheetAdd event instead
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 const { data: data } = await useFetch(
   `/api/${site}/parse`,
@@ -110,10 +135,12 @@ const { data: data } = await useFetch(
       "prop": "text|langlinks|categories|displaytitle|properties|parsewarnings",
     }
   }
-).then((resp) => {
+).then(async (resp) => {
   const data = resp.data;
-  if (data.value.parse.title) {
-    useRouter().push("../wiki/"+data.value.parse.title.replaceAll(" ", "_"))
+  if (data.value.parse.redirects[0]) {
+    if (import.meta.server) {
+      await navigateTo(`/${site}/wiki/${data.value.parse.redirects[0].to.replaceAll(" ", "_")}`);
+    }
   }
   // update the image srcs
   const $ = cheerio.load(data.value.parse.text);
@@ -145,11 +172,9 @@ const { data: data } = await useFetch(
 })
 
 const content = useTemplateRef("content");
-import { useSheets } from '#imports';
-import type { MiraiWiki } from '~~/shared/types/miraiwiki';
 onMounted(() => {
   //customElements.define("miraiwiki-audio", defineCustomElement(FAudio))
-
+  console.warn("Heads up! We'll be adding some more hydrations to the page!");
   const amogus = useRouter();
 
   const contentNode = content.value!;
@@ -179,7 +204,7 @@ onMounted(() => {
     elem.addEventListener("click", (e) => {
       amogus.replace({
         // this is dangerous
-        hash: "#" + (elem as HTMLLIElement).dataset["hash"]
+        hash: "#" + (elem as HTMLLIElement).dataset["hash"]?.trim() // for some reason it always has a leading hash
       })
       // remove .wds-is-current from all .wds-tab__content
       // and add it back to the content corresponds to the index
@@ -192,16 +217,6 @@ onMounted(() => {
       });
     });
   }))
-
-  // bind onclick to all anchor elements (that is obviously clickable) to call navigateTo
-  contentNode.querySelectorAll("a").forEach((elem) => {
-    if (elem.href && !elem.href.startsWith("#")) {
-      elem.addEventListener("click", (e) => {
-        e.preventDefault();
-        navigateTo(elem.href.replace(location.origin, ""), {external: !elem.href.includes(location.origin)});
-      });
-    }
-  });
 
   // idk
   contentNode.querySelectorAll("audio.mw-file-element").forEach((v)=>{
@@ -290,13 +305,15 @@ onMounted(() => {
 
   // file viewer modal handler
   const overlay = useOverlay();
-  contentNode.querySelectorAll("figure[typeof^=\"mw:File\"], figure.pi-image, div.gallery-image-wrapper").forEach((elem) => {
+  contentNode.querySelectorAll("figure[typeof^=\"mw:File\"], span[typeof^=\"mw:File\"], figure.pi-image, div.gallery-image-wrapper").forEach((elem) => {
     let fileName = elem.querySelector("a > img[data-image-name]")?.getAttribute("data-image-name");
     if (fileName === null) fileName = elem.querySelector("a > img[data-video-name]")?.getAttribute("data-video-name");
     if (fileName) {
       // disable anchor element from redirecting
       const anchor = elem.querySelector("a");
+
       if (anchor) {
+        anchor.setAttribute("miraiwiki-file-viewer-hook", "");
         anchor.addEventListener("click", (e) => {
           e.preventDefault();
         });
@@ -310,6 +327,17 @@ onMounted(() => {
           }
         });
         modal.open();
+      });
+    }
+  });
+
+
+  // bind onclick to all anchor elements (that is obviously clickable) to call navigateTo
+  contentNode.querySelectorAll("a").forEach((elem) => {
+    if (elem.href && !elem.href.startsWith("#") && !elem.hasAttribute("miraiwiki-file-viewer-hook")) {
+      elem.addEventListener("click", (e) => {
+        e.preventDefault();
+        navigateTo(elem.href.replace(location.origin, ""), {external: !elem.href.includes(location.origin)});
       });
     }
   });
@@ -365,5 +393,9 @@ ul.wikia-slideshow-images > li.wikia-slideshow-current {
   opacity: 1;
   display: block !important;
   transition: opacity 0.4s;
+}
+
+.wds-tabs {
+  overflow-x: auto;
 }
 </style>

@@ -5,6 +5,7 @@ const namespaces = [
   "Talk",
   "User",
   "User talk",
+  "User blog",
   "Project",
   "Project talk",
   "File",
@@ -24,6 +25,13 @@ export function namespacedPage(page:string) {
 }
 
 export function getPageNamespace(page:string) {
-    const ns = namespaces.find(ns => page.startsWith(`${ns}:`));
-    return ns ? ns : "Main";
+  const ns = namespaces.find(ns => page.startsWith(`${ns}:`));
+  return ns ? ns : "Main";
+}
+/// still does not account for this wiki's namespace
+export function getUnnamespacedPage(page:string) {
+  // tries to remove the namespace prefix from the provided string
+  const ns = getPageNamespace(page);
+  if (ns === "Main") return page;
+  return page.slice(ns.length + 1); // +1 for the colon
 }

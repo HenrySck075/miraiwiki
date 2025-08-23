@@ -33,12 +33,14 @@ import type { API, Query } from '~~/shared/types/actionapi';
 const route = useRoute();
 const page = (route.params.page as string[]).join("/");
 
+const limit = 200;
+
 type mambo = Query.objs.Page<[
   Query.Pages.prop.PageImages<[
     Query.Pages.prop.PageImages_thumbnail
   ]>
 ]>;
-const { data: resp } = useWikiFetch<APIResponse<[
+const { data: resp } = useWikiFetch<API.Response<[
   Query.Query<[
     Query.Pages.Pages<[
       Query.Pages.prop.PageImages<[
@@ -50,7 +52,7 @@ const { data: resp } = useWikiFetch<APIResponse<[
   query: {
     "generator": "categorymembers",
     "gcmtitle": page,
-    "gcmlimit": "200", /// sorting problem
+    "gcmlimit": limit+1,
     "gcmprop": "title",
     "prop": "pageimages",
     "piprop": "thumbnail"
@@ -74,7 +76,12 @@ const theme = useCookie("theme", { default: () => "Dark" });
 const groupedMembers = computed(() => {
   if (!resp.value) return {};
   const unordered = resp.value.query.pages.reduce((groups: Record<string, mambo[]>, member: mambo) => {
-    const firstChar = member.title.charAt(0).toUpperCase();
+    let unnamespacedTitle = member.title;
+    // if member.ns is not 0 then we're sure as hell everything before the first : is the namespace
+    if (member.ns !== 0) {
+      unnamespacedTitle = member.title.substring(member.title.indexOf(":") + 1);
+    }
+    const firstChar = unnamespacedTitle.charAt(0).toUpperCase();
     if (!groups[firstChar]) {
       groups[firstChar] = [];
     };

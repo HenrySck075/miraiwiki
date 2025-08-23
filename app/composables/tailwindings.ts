@@ -296,7 +296,7 @@ function hexToRgb(hex: string) {
 }
 
 // Function to find the nearest Tailwind color name and shade
-export function findNearestColor(hex: string) {
+function findNearestColor(hex: string) {
   const targetRgb = hexToRgb(hex);
   let nearestColor = null;
   let minDistance = Infinity;

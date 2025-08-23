@@ -33,7 +33,9 @@
                 </div>
               </template>
             </div>
-            <Footer></Footer>
+            <Footer>
+              This page displays proxied content from <a :href="`https://${route.params.site}.fandom.com/wiki/${page}`">{{ `https://${route.params.site}.fandom.com/wiki/${page}` }}</a>
+            </Footer>
           </div>
         </div>
       </div>
@@ -83,6 +85,14 @@ onMounted(()=>{
   }
 })
 
+const route = useRoute();
+if (import.meta.server) {
+  const pag = (route.params.page as string[]).join("/");
+  if (pag.includes(" ")) {
+    await navigateTo(`/${route.params.site}/wiki/${pag.replaceAll(" ", "_")}`);
+  }
+}
+
 const res = await useFetch<Blob>("/wds.svg");
 const svgText = await res.data.value?.text();
 
@@ -96,10 +106,6 @@ function pageComponentForNamespace(ns: string): any {
   )
 }
 
-const route = useRoute();
-if ((route.params.site! as string).endsWith(".fandom.com")) {
-  await navigateTo(route.fullPath.replace(".fandom.com", ""));
-}
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
 
 // first item is the page and everything else is the params

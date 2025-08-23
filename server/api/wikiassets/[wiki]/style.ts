@@ -91,7 +91,7 @@ export default defineEventHandler(async (e) => {
         else {
             const query = Object.assign({
                 "skin": "fandomdesktop",
-                ...(((getQuery(e)["modules"] as string | null)?.includes(".css")) && {"only": "styles"})
+                ...(((getQuery(e)["modules"] as string | null)?.includes(".css")) ? {"only": "styles"} : {"version": "ztntf"})
             }, getQuery(e));
             delete query["variant"];
             const queryStr = Object.keys(query).map((key) => `${key}=${query[key]}`).join("&");

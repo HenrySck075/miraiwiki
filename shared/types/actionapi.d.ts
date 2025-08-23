@@ -439,6 +439,7 @@ export namespace Query {
 export namespace Parse {
   export namespace prop {
     export type DisplayTitle = ({ displaytitle: string });
+    export type Wikitext = ({ wikitext: string });
   };
   export interface Obj { title: string; pageid: number }
   export type Parse<A extends readonly [...any]> = ({ parse: Spread<[Obj, ...A]> });

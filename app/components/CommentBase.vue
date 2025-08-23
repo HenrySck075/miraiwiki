@@ -6,7 +6,8 @@
       <span class="px-1">·</span>
       {{ new Date(data.creationDate.epochSecond*1000).toLocaleDateString() }}
     </div>
-    <WikiaDoc :content="content" :attachments="data.attachments"></WikiaDoc>
+    <WikiaDoc :content="content" :attachments="data.attachments" v-if="content" />
+    <div class="space-y-1" v-else v-html="data.renderedContent"></div>
     <slot></slot>
   </div>
 </template>
@@ -15,5 +16,5 @@
   const {data} = defineProps<{
     data: Post
   }>();
-  const content: CommentContentModel = JSON.parse(data.jsonModel);
+  const content: CommentContentModel|null = data.jsonModel ? JSON.parse(data.jsonModel) : null;
 </script>

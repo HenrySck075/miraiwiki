@@ -14,7 +14,8 @@ export interface Post {
         };
         isReported: boolean;
     };
-    jsonModel: string;
+    jsonModel?: string;
+    renderedContent?: string;
     attachments: Attachment;
     createdBy: User;
 }

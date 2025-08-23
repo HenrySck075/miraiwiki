@@ -4,12 +4,14 @@
     const site = useRoute().params.site as string;
     import fs from 'fs'
     import path from 'path'
+    if (import.meta.server) {
 
-    const publicDir = path.resolve(process.cwd(), 'public')
-    const publicFiles = fs.readdirSync(publicDir)
+        const publicDir = path.resolve(process.cwd(), 'public')
+        const publicFiles = fs.readdirSync(publicDir)
 
-    if (publicFiles.includes(site)) {
-        throw new Error('if useFetch calls this i will kms')
+        if (publicFiles.includes(site)) {
+            throw new Error('if useFetch calls this i will kms')
+        }
     }
     const res = await $fetch<{ parse: { wikitext: string } }>(
         `/api/${site}/parse`,
@@ -23,4 +25,8 @@
 
     // Redirect to the mainpage
     navigateTo(`/${site}/wiki/${mainpage}`)
+
+    definePageMeta({
+        alias: ["/:site/wiki"]
+    })
 </script>
