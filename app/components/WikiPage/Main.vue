@@ -2,6 +2,8 @@
   <WikiPageBase>
     <!--cascading slots-->
     <template #top>
+      <component is="script" src="/mw/startup.js"></component>
+      <component is="script" :src="`/api/wikiassets/${site}/js?lang=en&modules=ext.fandom.ContentReview.legacyLoaders.js&skin=fandomdesktop&version=erl10`"></component>
       <component is="script" :src="importsUrl"></component>
       <slot name="top"></slot>
     </template>
@@ -81,7 +83,7 @@ const imports = (await useWikiFetch<API.Response<[
 })).data.value.parse.wikitext.split("\n");
 
 const route = useRoute();
-const files = imports.map((file)=>file.includes(":") ? `u:${file}` : file).join("|");
+const files = imports.map((file)=>file.startsWith("dev:") ? `u:dev:MediaWiki:${file.substring(file.indexOf(':')+1)}` : `MediaWiki:${file}`).join("|");
 const importsUrl = `/api/wikiassets/${route.params.site}/style?modules=${files}`
 
 const page = [pageWithParams.page, ...pageWithParams.params].join("/");

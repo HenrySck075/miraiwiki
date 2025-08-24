@@ -2,6 +2,11 @@
 <script setup lang="ts">
 
     const site = useRoute().params.site as string;
+    // if site string looks like a filename, cancels loading
+    if (site.match(/\.[a-zA-Z0-9]+$/)) {
+        console.error(useRoute().fullPath);
+        throw new Error('if useFetch calls this i will kms')
+    }
     import fs from 'fs'
     import path from 'path'
     if (import.meta.server) {

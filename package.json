@@ -20,6 +20,7 @@
     "culori": "^4.0.2",
     "js-beautify": "^1.15.4",
     "nuxt": "^4.0.0",
+    "user-agents": "^1.1.641",
     "vue": "^3.5.17",
     "vue-router": "^4.5.1",
     "zod": "^4.0.17"
@@ -28,6 +29,7 @@
     "@iconify-json/mdi": "^1.2.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/css": "^0.0.38",
-    "@types/js-beautify": "^1.14.3"
+    "@types/js-beautify": "^1.14.3",
+    "@types/user-agents": "^1.0.4"
   }
 }

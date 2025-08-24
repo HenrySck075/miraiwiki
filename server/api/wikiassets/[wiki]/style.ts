@@ -61,7 +61,6 @@ const assetsDomains = [
 ]
 import * as cssParser from "css";
 import { removePrefix } from "~~/shared/utils/utils"; /// vscode is bad at noticing that these are autoimported
-import * as beautify from "js-beautify";
 export default defineEventHandler(async (e) => {
     const wiki = getRouterParam(e, "wiki");
     const theme = getQuery(e)["variant"] ?? "dark"
@@ -103,8 +102,6 @@ export default defineEventHandler(async (e) => {
             }
             e.node.res.statusCode = data.status;
             // early return if content-type is not css
-            console.log(e.node.req.url);
-            console.log(data.headers.get("content-type"))
             if (!data.headers.get("content-type")?.includes("text/css") || data.status !== 200) {
                 e.node.res.write(css);
                 e.node.res.end();

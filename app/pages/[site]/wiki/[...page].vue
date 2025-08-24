@@ -93,7 +93,7 @@ if (import.meta.server) {
   }
 }
 
-const res = await useFetch<Blob>("/wds.svg");
+const res = await useFetch<Blob>("/assets/wds.svg");
 const svgText = await res.data.value?.text();
 
 function pageComponentForNamespace(ns: string): any {
@@ -185,12 +185,18 @@ useWikiMeta({
   page: page
 });
 
+// ${site}.fandom.com/wiki/Special:FilePath/Site-favicon.ico
+let faviconUrl = `https://${site}.fandom.com/wiki/Special:FilePath/Site-favicon.ico`;
+//meta.value["favicon"].replace("$wgUploadPath", `https://static.wikia.nocookie.net/${site}/images`);
+
+
 useHead({
   link: [
     {
       rel: "icon",
       type: 'image/x-icon',
-      href: meta.value["favicon"].replace("$wgUploadPath", `https://static.wikia.nocookie.net/${site}/images`)
+      crossorigin: "",
+      href: faviconUrl
     },
     {
       rel: 'canonical',
