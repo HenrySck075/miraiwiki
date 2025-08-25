@@ -18,13 +18,16 @@ export default defineEventHandler(async (e)=>{
     query["format"] = "json";
     const ret = await $fetch.raw(`https://${sitename}.fandom.com/api.php`, {
         query: query,
-        headers: headers
+        headers: headers,
+        responseType: "text"
     },);
 
-    console.log(ret);
     e.node.res.statusCode = ret.status;
     e.node.res.setHeaders(new Map(ret.headers.entries().filter(
         (v)=>!v[0].toLowerCase().startsWith("x-") && !["access-control-allow-origin", 'access-control-allow-credentials', 'content-length', 'content-encoding'].includes(v[0].toLowerCase())
     )));
-    return ret._data;
+    /// this endpoint is guaranteed json-only
+    e.node.res.setHeader("Content-Type", "application/json");
+    e.node.res.write(ret._data);
+    e.node.res.end();
 })

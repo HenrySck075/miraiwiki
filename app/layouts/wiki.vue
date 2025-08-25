@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 import {load as cheerioLoad} from 'cheerio';
+import type { API, Parse } from '~~/shared/types/actionapi';
 
 
 type mope = {
@@ -48,16 +49,22 @@ const themeItems = [
   //{label: "System"}
 ]
 const route = useRoute();
-const headers = await useFetch(
-  `/api/${route.params.site}/parse`,
+const headersData = await useWikiFetch<API.Response<[
+  Parse.Parse<[
+    Parse.prop.Wikitext,
+    Parse.prop.IWLinks
+  ]>
+]>>(
+  '/parse',
   {
     query: {
       "page": "MediaWiki:Wiki-navigation",
       "prop": "wikitext|iwlinks"
     }
   }
-).then((data) => {
-  const content: string = data.data.value["parse"]["wikitext"];
+);
+  console.log(headersData.data.value);
+  const content: string = headersData.data.value["parse"]["wikitext"];
   function airth(str: string): mope[] {
     const ret = [];
     for (const match of str.matchAll(/^\*([^*]+)\n((?:\*\*(?:[^\n$]*)[\n$])*)/gm)) {
@@ -80,7 +87,7 @@ const headers = await useFetch(
         dest = page.slice(1, -1);
       } else {
         const maybeInterwikiPage = page.replace(/^\[\[|\]\]$/g, "");
-        const iwlink = data.data.value["parse"]["iwlinks"].find((e: any) => e.title == maybeInterwikiPage);
+        const iwlink = headersData.data.value["parse"]["iwlinks"].find((e: any) => e.title == maybeInterwikiPage);
         dest = iwlink ? convertURL(iwlink.url) : `/${route.params.site}/wiki/${page}`;
       }
       ret.push({
@@ -91,7 +98,7 @@ const headers = await useFetch(
     }
     return ret
   }
-  return [
+  const headers = [
     {
       label: "Explore",
       to: "#",
@@ -114,7 +121,6 @@ const headers = await useFetch(
     },
     ...airth(content)
   ];
-});
 
 const settingsDialog = ref(false);
 </script>

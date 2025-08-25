@@ -440,6 +440,7 @@ export namespace Parse {
   export namespace prop {
     export type DisplayTitle = ({ displaytitle: string });
     export type Wikitext = ({ wikitext: string });
+    export type IWLinks = ({ iwlinks: {title: string, url: string}[] });
   };
   export interface Obj { title: string; pageid: number }
   export type Parse<A extends readonly [...any]> = ({ parse: Spread<[Obj, ...A]> });
