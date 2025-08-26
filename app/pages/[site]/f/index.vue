@@ -144,8 +144,8 @@ async function fetchThreads() {
   if (forumId.value !== "") {
     params.append("forumId", forumId.value);
   }
-  const q = await useFetch<DiscussionThreads>(
-    `/api/${route.params.site}/${ctrl}/${method}?${params.toString()}`
+  const q = await useWikiFetch<DiscussionThreads>(
+    `/${ctrl}/${method}?${params.toString()}`
   ).then((d)=>{
     threads.value.push(...d.data.value!._embedded.threads);
     nextThreadsUrl = d.data.value!._links.next?.[0]?.href || null;
@@ -172,7 +172,7 @@ function setCurrentThread(id: string) {
 const forums = computed(()=>data.value!._embedded.forums.toSorted((a,b)=>threadCountOf(b)-threadCountOf(a)))
 
 
-const {data: feeds} = await useFetch<FeedsAndPosts>(`/api/${route.params.site}/FeedsAndPosts/getAll`)
+const {data: feeds} = await useWikiFetch<FeedsAndPosts>('/FeedsAndPosts/getAll')
 useSeoMeta({
   title: ()=>`Discuss everything about ${feeds.value?.wikiVariables.name} | MiraiWiki`
 })

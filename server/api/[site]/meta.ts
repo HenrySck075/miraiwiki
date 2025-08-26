@@ -4,7 +4,8 @@ export default defineCachedEventHandler(async (e)=>{
         {
             query: {
                 meta: "siteinfo"
-            }
+            },
+            responseType: "json"
         }
     ))["query"]["general"]
 }, {

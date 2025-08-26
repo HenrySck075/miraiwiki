@@ -23,11 +23,11 @@ export default defineEventHandler(async (e)=>{
     },);
 
     e.node.res.statusCode = ret.status;
+    e.node.res.setHeader("Content-Type", "application/json; charset=utf-8");
     e.node.res.setHeaders(new Map(ret.headers.entries().filter(
         (v)=>!v[0].toLowerCase().startsWith("x-") && !["access-control-allow-origin", 'access-control-allow-credentials', 'content-length', 'content-encoding'].includes(v[0].toLowerCase())
     )));
     /// this endpoint is guaranteed json-only
-    e.node.res.setHeader("Content-Type", "application/json");
     e.node.res.write(ret._data);
     e.node.res.end();
 })

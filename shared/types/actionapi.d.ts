@@ -440,8 +440,20 @@ export namespace Parse {
   export namespace prop {
     export type DisplayTitle = ({ displaytitle: string });
     export type Wikitext = ({ wikitext: string });
+    export type Text = ({ text: string });
     export type IWLinks = ({ iwlinks: {title: string, url: string}[] });
+    export type LangLinks = ({ langlinks: {
+      lang: string,
+      url: string,
+      langname: string,
+      autonym: string,
+      title: string
+    }[] });
+    export type Categories = ({ categories: {sortkey: string, category: string}[] });
   };
+  export namespace opts {
+    export type Redirects = ({ redirects: {from: string, to: string}[] });
+  }
   export interface Obj { title: string; pageid: number }
   export type Parse<A extends readonly [...any]> = ({ parse: Spread<[Obj, ...A]> });
 }

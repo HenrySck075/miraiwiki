@@ -488,7 +488,7 @@ if ( !isCompatible() ) {
 	 * @property {Object}
 	 * @private
 	 */
-	var registry = Object.create( null ),
+	var registry = new Map(),
 		// Mapping of sources, keyed by source-id, values are strings.
 		//
 		// Format:
@@ -644,7 +644,7 @@ if ( !isCompatible() ) {
 	 */
 	function getCombinedVersion( modules ) {
 		var hashes = modules.reduce( function ( result, module ) {
-			return result + registry[ module ].version;
+			return result + registry.get( module ).version;
 		}, '' );
 		return fnv132( hashes );
 	}
@@ -674,7 +674,7 @@ if ( !isCompatible() ) {
 	 * @return {boolean} True if all direct/base dependencies are in state 'ready'; false otherwise
 	 */
 	function allWithImplicitReady( module ) {
-		return allReady( registry[ module ].dependencies ) &&
+		return allReady( registry.get( module ).dependencies ) &&
 			( baseModules.indexOf( module ) !== -1 || allReady( baseModules ) );
 	}
 
@@ -724,14 +724,14 @@ if ( !isCompatible() ) {
 				var errorModule = errorModules.shift(),
 					baseModuleError = baseModules.indexOf( errorModule ) !== -1;
 				for ( module in registry ) {
-					if ( registry[ module ].state !== 'error' && registry[ module ].state !== 'missing' ) {
+					if ( registry.get( module ).state !== 'error' && registry.get( module ).state !== 'missing' ) {
 						if ( baseModuleError && baseModules.indexOf( module ) === -1 ) {
 							// Propate error from base module to all regular (non-base) modules
-							registry[ module ].state = 'error';
+							registry.get( module ).state = 'error';
 							didPropagate = true;
-						} else if ( registry[ module ].dependencies.indexOf( errorModule ) !== -1 ) {
+						} else if ( registry.get( module ).dependencies.indexOf( errorModule ) !== -1 ) {
 							// Propagate error from dependency to depending module
-							registry[ module ].state = 'error';
+							registry.get( module ).state = 'error';
 							// .. and propagate it further
 							errorModules.push( module );
 							didPropagate = true;
@@ -742,7 +742,7 @@ if ( !isCompatible() ) {
 
 			// Stage 2: Execute 'loaded' modules with no unsatisfied dependencies
 			for ( module in registry ) {
-				if ( registry[ module ].state === 'loaded' && allWithImplicitReady( module ) ) {
+				if ( registry.get( module ).state === 'loaded' && allWithImplicitReady( module ) ) {
 					// Recursively execute all dependent modules that were already loaded
 					// (waiting for execution) and no longer have unsatisfied dependencies.
 					// Base modules may have dependencies amongst eachother to ensure correct
@@ -792,7 +792,7 @@ if ( !isCompatible() ) {
 	 * @param {string} state
 	 */
 	function setAndPropagate( module, state ) {
-		registry[ module ].state = state;
+		registry.get( module ).state = state;
 		if ( state === 'ready' ) {
 			// Queue to later be synced to the local module store.
 			store.add( module );
@@ -841,12 +841,12 @@ if ( !isCompatible() ) {
 			throw new Error( 'Unknown module: ' + module );
 		}
 
-		if ( typeof registry[ module ].skip === 'string' ) {
+		if ( typeof registry.get( module ).skip === 'string' ) {
 			// eslint-disable-next-line no-new-func
-			var skip = ( new Function( registry[ module ].skip )() );
-			registry[ module ].skip = !!skip;
+			var skip = ( new Function( registry.get( module ).skip )() );
+			registry.get( module ).skip = !!skip;
 			if ( skip ) {
-				registry[ module ].dependencies = [];
+				registry.get( module ).dependencies = [];
 				setAndPropagate( module, 'ready' );
 				return;
 			}
@@ -858,7 +858,7 @@ if ( !isCompatible() ) {
 		}
 
 		// Track down dependencies
-		var deps = registry[ module ].dependencies;
+		var deps = registry.get( module ).dependencies;
 		unresolved.add( module );
 		for ( var i = 0; i < deps.length; i++ ) {
 			if ( resolved.indexOf( deps[ i ] ) === -1 ) {
@@ -1090,7 +1090,7 @@ if ( !isCompatible() ) {
 			// Keep in sync with execute()/runScript().
 			if ( moduleName !== 'jquery' ) {
 				window.require = mw.loader.require;
-				window.module = registry[ moduleName ].module;
+				window.module = registry.get( moduleName ).module;
 			}
 			addScript( src, function () {
 				// 'module.exports' should not persist after the file is executed to
@@ -1210,7 +1210,7 @@ if ( !isCompatible() ) {
 			jobs.push( {
 				// Narrow down the list to modules that are worth waiting for
 				dependencies: dependencies.filter( function ( module ) {
-					var state = registry[ module ].state;
+					var state = registry.get( module ).state;
 					return state === 'registered' || state === 'loaded' || state === 'loading' || state === 'executing';
 				} ),
 				ready: ready,
@@ -1221,7 +1221,7 @@ if ( !isCompatible() ) {
 		dependencies.forEach( function ( module ) {
 			// Only queue modules that are still in the initial 'registered' state
 			// (e.g. not ones already loading or loaded etc.).
-			if ( registry[ module ].state === 'registered' && queue.indexOf( module ) === -1 ) {
+			if ( registry.get( module ).state === 'registered' && queue.indexOf( module ) === -1 ) {
 				queue.push( module );
 			}
 		} );
@@ -1236,16 +1236,17 @@ if ( !isCompatible() ) {
 	 * @param {string} module Module name to execute
 	 */
 	function execute( module ) {
-		if ( registry[ module ].state !== 'loaded' ) {
-			throw new Error( 'Module in state "' + registry[ module ].state + '" may not execute: ' + module );
+		debugger;
+		if ( registry.get( module ).state !== 'loaded' ) {
+			throw new Error( 'Module in state "' + registry.get( module ).state + '" may not execute: ' + module );
 		}
 
-		registry[ module ].state = 'executing';
+		registry.get( module ).state = 'executing';
 		
 
 		var runScript = function () {
 			
-			var script = registry[ module ].script;
+			var script = registry.get( module ).script;
 			var markModuleReady = function () {
 				
 				setAndPropagate( module, 'ready' );
@@ -1280,7 +1281,7 @@ if ( !isCompatible() ) {
 					} else {
 						// Pass jQuery twice so that the signature of the closure which wraps
 						// the script can bind both '$' and 'jQuery'.
-						script( window.$, window.$, mw.loader.require, registry[ module ].module );
+						script( window.$, window.$, mw.loader.require, registry.get( module ).module );
 					}
 					markModuleReady();
 				} else if ( typeof script === 'object' && script !== null ) {
@@ -1290,9 +1291,9 @@ if ( !isCompatible() ) {
 					}
 					// jQuery parameters are not passed for multi-file modules
 					mainScript(
-						makeRequireFunction( registry[ module ], script.main ),
-						registry[ module ].module,
-						registry[ module ].module.exports
+						makeRequireFunction( registry.get( module ), script.main ),
+						registry.get( module ).module,
+						registry.get( module ).module.exports
 					);
 					markModuleReady();
 				} else if ( typeof script === 'string' ) {
@@ -1320,18 +1321,18 @@ if ( !isCompatible() ) {
 		};
 
 		// Emit deprecation warnings
-		if ( registry[ module ].deprecationWarning ) {
-			mw.log.warn( registry[ module ].deprecationWarning );
+		if ( registry.get( module ).deprecationWarning ) {
+			mw.log.warn( registry.get( module ).deprecationWarning );
 		}
 
 		// Add localizations to message system
-		if ( registry[ module ].messages ) {
-			mw.messages.set( registry[ module ].messages );
+		if ( registry.get( module ).messages ) {
+			mw.messages.set( registry.get( module ).messages );
 		}
 
 		// Initialise templates
-		if ( registry[ module ].templates ) {
-			mw.templates.set( module, registry[ module ].templates );
+		if ( registry.get( module ).templates ) {
+			mw.templates.set( module, registry.get( module ).templates );
 		}
 
 		// Adding of stylesheets is asynchronous via addEmbeddedCSS().
@@ -1366,7 +1367,7 @@ if ( !isCompatible() ) {
 		// Process styles (see also mw.loader.impl)
 		// * { "css": [css, ..] }
 		// * { "url": { <media>: [url, ..] } }
-		var style = registry[ module ].style;
+		var style = registry.get( module ).style;
 		if ( style ) {
 			// Array of CSS strings under key 'css'
 			// { "css": [css, ..] }
@@ -1535,8 +1536,8 @@ if ( !isCompatible() ) {
 		// Split module list by source and by group.
 		var splits = Object.create( null );
 		for ( var b = 0; b < batch.length; b++ ) {
-			var bSource = registry[ batch[ b ] ].source;
-			var bGroup = registry[ batch[ b ] ].group;
+			var bSource = registry.get(batch[ b ]).source;
+			var bGroup = registry.get(batch[ b ]).group;
 			if ( !splits[ bSource ] ) {
 				splits[ bSource ] = Object.create( null );
 			}
@@ -1664,7 +1665,7 @@ if ( !isCompatible() ) {
 	 *  or null if the module does not exist
 	 */
 	function getModuleKey( module ) {
-		return module in registry ? ( module + '@' + registry[ module ].version ) : null;
+		return module in registry ? ( module + '@' + registry.get( module ).version ) : null;
 	}
 
 	/**
@@ -1702,7 +1703,7 @@ if ( !isCompatible() ) {
 			throw new Error( 'module already registered: ' + module );
 		}
 
-		registry[ module ] = {
+		registry.set( module, {
 			// Exposed to execute() for mw.loader.impl() closures.
 			// Import happens via require().
 			module: {
@@ -1716,7 +1717,7 @@ if ( !isCompatible() ) {
 			source: typeof source === 'string' ? source : 'local',
 			state: 'registered',
 			skip: typeof skip === 'string' ? skip : null
-		};
+		});
 	}
 
 	/* Public Members */
@@ -1780,7 +1781,7 @@ if ( !isCompatible() ) {
 					!batch.has( module )
 				) {
 					// Progress the state machine
-					registry[ module ].state = 'loading';
+					registry.get( module ).state = 'loading';
 					batch.add( module );
 
 					var implementation = store.get( module );
@@ -1821,7 +1822,7 @@ if ( !isCompatible() ) {
 				} );
 				// For any failed ones, fallback to requesting from network
 				var failed = storedNames.filter( function ( name ) {
-					return registry[ name ].state === 'loading';
+					return registry.get( name ).state === 'loading';
 				} );
 				batchRequest( failed );
 			} );
@@ -1930,18 +1931,18 @@ if ( !isCompatible() ) {
 				mw.loader.register( name );
 			}
 			// Check for duplicate implementation
-			if ( registry[ name ].script !== undefined ) {
+			if ( registry.get( name ).script !== undefined ) {
 				throw new Error( 'module already implemented: ' + name );
 			}
-			registry[ name ].version = version;
-			registry[ name ].declarator = null; // not supported
-			registry[ name ].script = script;
-			registry[ name ].style = style;
-			registry[ name ].messages = messages;
-			registry[ name ].templates = templates;
-			registry[ name ].deprecationWarning = deprecationWarning;
+			registry.get( name ).version = version;
+			registry.get( name ).declarator = null; // not supported
+			registry.get( name ).script = script;
+			registry.get( name ).style = style;
+			registry.get( name ).messages = messages;
+			registry.get( name ).templates = templates;
+			registry.get( name ).deprecationWarning = deprecationWarning;
 			// The module may already have been marked as erroneous
-			if ( registry[ name ].state !== 'error' && registry[ name ].state !== 'missing' ) {
+			if ( registry.get( name ).state !== 'error' && registry.get( name ).state !== 'missing' ) {
 				setAndPropagate( name, 'loaded' );
 			}
 		},
@@ -1994,29 +1995,35 @@ if ( !isCompatible() ) {
 				split = splitModuleKey( module ),
 				name = split.name,
 				version = split.version;
-
+			if ( 
+				module.indexOf('Tracker') !== -1 || 
+				module.indexOf('Tracking') !== -1 ||
+				module.indexOf('visualEditor') !== -1
+			) {
+				return;
+			}
 			// Automatically register module
 			if ( !( name in registry ) ) {
 				mw.loader.register( name );
 			}
 			// Check for duplicate implementation
-			if ( registry[ name ].script !== undefined ) {
+			if ( registry.get( name ).script !== undefined ) {
 				throw new Error( 'module already implemented: ' + name );
 			}
 			// Without this reset, if there is a version mismatch between the
 			// requested and received module version, then mw.loader.store would
 			// cache the response under the requested key. Thus poisoning the cache
 			// indefinitely with a stale value. (T117587)
-			registry[ name ].version = version;
+			registry.get( name ).version = version;
 			// Attach components
-			registry[ name ].declarator = declarator;
-			registry[ name ].script = script;
-			registry[ name ].style = style;
-			registry[ name ].messages = messages;
-			registry[ name ].templates = templates;
-			registry[ name ].deprecationWarning = deprecationWarning;
+			registry.get( name ).declarator = declarator;
+			registry.get( name ).script = script;
+			registry.get( name ).style = style;
+			registry.get( name ).messages = messages;
+			registry.get( name ).templates = templates;
+			registry.get( name ).deprecationWarning = deprecationWarning;
 			// The module may already have been marked as erroneous
-			if ( registry[ name ].state !== 'error' && registry[ name ].state !== 'missing' ) {
+			if ( registry.get( name ).state !== 'error' && registry.get( name ).state !== 'missing' ) {
 				setAndPropagate( name, 'loaded' );
 			}
 		},
@@ -2124,7 +2131,7 @@ if ( !isCompatible() ) {
 		 *  in the registry.
 		 */
 		getState: function ( module ) {
-			return module in registry ? registry[ module ].state : null;
+			return module in registry ? registry.get( module ).state : null;
 		},
 
 		/**
@@ -2176,8 +2183,8 @@ if ( !isCompatible() ) {
 			}
 
 			return path ?
-				makeRequireFunction( registry[ moduleName ], '' )( './' + path ) :
-				registry[ moduleName ].module.exports;
+				makeRequireFunction( registry.get( moduleName ), '' )( './' + path ) :
+				registry.get( moduleName ).module.exports;
 		}
 	};
 
@@ -2395,7 +2402,7 @@ if ( !isCompatible() ) {
 		 * @param {string} module Module name
 		 */
 		set: function ( module ) {
-			var descriptor = registry[ module ],
+			var descriptor = registry.get( module ),
 				key = getModuleKey( module );
 
 			if (

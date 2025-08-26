@@ -63,11 +63,10 @@ const headersData = await useWikiFetch<API.Response<[
     }
   }
 );
-  console.log(headersData.data.value);
   const content: string = headersData.data.value["parse"]["wikitext"];
   function airth(str: string): mope[] {
     const ret = [];
-    for (const match of str.matchAll(/^\*([^*]+)\n((?:\*\*(?:[^\n$]*)[\n$])*)/gm)) {
+    for (const match of str.matchAll(/^\*([^*]+)\n((?:\*\*(?:[^\n$]*)[\n$])*)/gm)) {  
       /// Subitems declaration string
       /// (with a \n as a failsafe because i cant match eol in char classes sadge)
       const cleanedSubDecl = match[2]!.replace(/^\*+/gm, (m) => m.slice(1)).trim()+"\n";

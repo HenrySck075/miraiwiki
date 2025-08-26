@@ -63,7 +63,8 @@ async function update() {
       prop: "imageinfo",
       titles: `File:${file.value}`,
       iiprop: "user|url|metadata|mime"
-    }
+    },
+    responseType: "json"
   }).then((data) => data.data.value["query"]["pages"][0]["imageinfo"][0])
 }
 const imgAuthor = computed(() => imgInfo.value?.["user"] ?? "");

@@ -54,7 +54,7 @@ const {user, site} = defineProps<{
   user: string
 }>();
 ///https://love-live.fandom.com/wikia.php?controller=UserProfile&method=getUserData&format=json&userId=25708385
-const userid = await useFetch<API.Response<[Query.Query<[Query.AllUsers]>]>>(`/api/${site}/query`, {
+const userid = await useWikiFetch<API.Response<[Query.Query<[Query.AllUsers]>]>>('/query', {
   query: {
     "list": "allusers",
     "aufrom": user,

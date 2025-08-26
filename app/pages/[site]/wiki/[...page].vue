@@ -179,14 +179,14 @@ const { data: balls } = await useWikiFetch<API.Response<[
     }
   }
 )
-const { data: meta } = await useFetch(`/api/${site}/meta`)
+const { data: meta } = await useWikiFetch<any>('/meta')
 useWikiMeta({
   site: meta.value.sitename,
   page: page
 });
 
 // ${site}.fandom.com/wiki/Special:FilePath/Site-favicon.ico
-let faviconUrl = `https://${site}.fandom.com/wiki/Special:FilePath/Site-favicon.ico`;
+let faviconUrl = `/api/${site}/favicon`;
 //meta.value["favicon"].replace("$wgUploadPath", `https://static.wikia.nocookie.net/${site}/images`);
 
 
@@ -195,7 +195,6 @@ useHead({
     {
       rel: "icon",
       type: 'image/x-icon',
-      crossorigin: "",
       href: faviconUrl
     },
     {
@@ -278,7 +277,7 @@ if (!indieVersion) {
   isCommentsVisible = useElementVisibility(commentsNode);
   watch(isCommentsVisible, async (e) => {
     if (e && comments.value == null) {
-      comments.value = (await useFetch<beef>(`/api/${site}/ArticleCommentsController/getComments`, {
+      comments.value = (await useWikiFetch<beef>('/ArticleCommentsController/getComments', {
         query: {
           title: displayTitle,
           namespace: "0", /// TODO

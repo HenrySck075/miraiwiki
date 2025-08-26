@@ -128,8 +128,18 @@ function updateTree(e: cheerio.Cheerio<SElement>) {
 }
 
 const currentTheme = useCookie("theme", { "default": () => "Dark", watch: "shallow" });
-const { data: data } = await useFetch(
-  `/api/${site}/parse`,
+const { data: data } = await useWikiFetch<API.Response<[
+  Parse.Parse<[
+    Parse.prop.Text,
+    Parse.prop.LangLinks,
+    Parse.prop.Categories,
+    Parse.prop.DisplayTitle,
+    Parse.opts.Redirects
+    //Parse.prop.Properties,
+    //Parse.prop.Parsewarnings
+  ]>
+]>>(
+  `/parse`,
   {
     query: {
       "page": page,
@@ -139,7 +149,7 @@ const { data: data } = await useFetch(
   }
 ).then(async (resp) => {
   const data = resp.data;
-  if (data.value.parse.redirects[0]) {
+  if (data.value.parse.redirects && data.value.parse.redirects[0]) {
     if (import.meta.server) {
       await navigateTo(`/${site}/wiki/${data.value.parse.redirects[0].to.replaceAll(" ", "_")}`);
     }
@@ -168,7 +178,7 @@ const { data: data } = await useFetch(
     const { addSheet } = useSheets();
     addSheet(`modules=${extraSheets.join("|")}`)
   }
-  data.value.parse.text = $("body > div").html();
+  data.value.parse.text = $("body > div").html() as string;
   //
   return { data: data };
 })
