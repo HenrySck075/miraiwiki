@@ -19,8 +19,6 @@ export default defineEventHandler(async (event) => {
     event.node.res.setHeader('Content-Type', res.headers.get('Content-Type') || 'image/x-icon');
     event.node.res.setHeader('Content-Length', res.headers.get('Content-Length') || (res._data as ArrayBuffer).byteLength);
     event.node.res.setHeader('cache-control', 'public, max-age=86400, stale-while-revalidate=3600');
-    console.log(type(res._data));
-    console.log(res.headers.get('content-type'));
     
     event.node.res.end(Buffer.from(res._data as ArrayBuffer));
 }

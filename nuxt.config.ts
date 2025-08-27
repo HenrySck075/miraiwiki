@@ -3,8 +3,20 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   modules: [
-    '@nuxt/ui',
-    '@nuxt/image',
+    '@nuxt/ui', 
+    '@nuxt/image', 
+    ['nuxt-viewport', {
+      defaultBreakpoints: {
+        xs: 0,
+        sm: 640,
+        md: 768,
+        lg: 1024,
+        xl: 1280,
+        '2xl': 1536
+      },
+      defaultViewport: 'sm',
+      throttle: 200
+    }]
   ],
   experimental: {
     asyncContext: true

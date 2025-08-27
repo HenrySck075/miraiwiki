@@ -1,23 +1,27 @@
 <template>
-  <div class="flex w-full h-full flex-col overflow-y-hidden">
-    <div class="space-x-1 p-3 flex">
-      <template v-for="(tlhead, idx) in headers">
-        <UDropdownMenu :items="tlhead.children">
-          <UButton size="lg" variant="outline" color="neutral">
-            {{ tlhead.label }}
-          </UButton>
-        </UDropdownMenu>
-      </template>
-      <div style="flex-grow: 1"></div>
-      <UButton icon="mdi:github" to="https://github.com/HenrySck075/miraiwiki" variant="ghost" color="neutral" title="Source code"></UButton>
-      <Search>
-      </Search>
-      <UButton @click="currentTheme = currentTheme == 'dark' ? 'light' : 'dark'" :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
-      <SettingsMenu v-model="settingsDialog">
-        <UButton icon="mdi:cog" variant="ghost" color="neutral" title="Settings" @click="settingsDialog = true"></UButton>
-      </SettingsMenu>
+  <div class="w-full min-h-full overflow-y-clip">
+    <div class="p-3 bg-default/60 backdrop-blur sticky top-0 z-[1000] w-full rounded-none">
+      <div class="flex gap-2 ">
+        <template v-for="(tlhead, idx) in headers" v-if="!isMobile">
+          <UDropdownMenu :items="tlhead.children">
+            <UButton size="lg" variant="outline" color="neutral" class="bg-default/0">
+              {{ tlhead.label }}
+            </UButton>
+          </UDropdownMenu>
+        </template>
+        <div style="flex-grow: 1"></div>
+        <UButton icon="mdi:github" to="https://github.com/HenrySck075/miraiwiki" variant="ghost" color="neutral" title="Source code"></UButton>
+        <Search>
+        </Search>
+        <UButton @click="currentTheme = currentTheme == 'dark' ? 'light' : 'dark'" :icon="themeItems.find((v) => v.label == currentTheme)?.icon" variant="ghost" color="neutral" title="Theme"/>
+        <SettingsMenu v-model="settingsDialog">
+          <UButton icon="mdi:cog" variant="ghost" color="neutral" title="Settings" @click="settingsDialog = true"></UButton>
+        </SettingsMenu>
+        <UButton variant="ghost" color="neutral" icon="mdi:menu" @click="mobileNavOpen = !mobileNavOpen" v-if="isMobile"></UButton>
+      </div>
+      <WikiNav v-model:open="mobileNavOpen" :headers="headers"></WikiNav>
     </div>
-    <div id="miraiwiki-content" class="overflow-y-scroll">
+    <div id="miraiwiki-content">
       <slot></slot>
     </div>
   </div>
@@ -33,6 +37,11 @@
 import {load as cheerioLoad} from 'cheerio';
 import type { API, Parse } from '~~/shared/types/actionapi';
 
+const crack = useViewport();
+
+const isMobile = computed(()=>crack.isLessOrEquals("tablet")) /*(typeof useCookie("mobile").value) === "string"*/;
+
+const mobileNavOpen = ref(false);
 
 type mope = {
     label: string,
@@ -79,7 +88,7 @@ const headersData = await useWikiFetch<API.Response<[
       if (label.includes("<")) label = cheerioLoad(label, {}, false)("*").text();
       /// the url for the item
       let dest: string;
-      if (isPlainLink) {
+      if (isPlainLink || page.trimStart().startsWith("#")) {
         dest = "#";
       }
       else if (/^\[[^\[\]]+\]$/.test(page)) {
@@ -87,12 +96,13 @@ const headersData = await useWikiFetch<API.Response<[
       } else {
         const maybeInterwikiPage = page.replace(/^\[\[|\]\]$/g, "");
         const iwlink = headersData.data.value["parse"]["iwlinks"].find((e: any) => e.title == maybeInterwikiPage);
-        dest = iwlink ? convertURL(iwlink.url) : `/${route.params.site}/wiki/${page}`;
+        const deadass = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/
+        dest = iwlink || deadass.test(page) ? convertURL(iwlink?.url ?? page) : `/${route.params.site}/wiki/${page}`;
       }
       ret.push({
         "label": label,
         "to": cleanedSubDecl.length != 1 ? "#" : dest,
-        "children": cleanedSubDecl.length != 1 ? (!isPlainLink ? [{label: label, to: dest, "class": "font-bold"}, ...airth(cleanedSubDecl)] : airth(cleanedSubDecl)) : undefined
+        "children": cleanedSubDecl.length != 1 ? (!isPlainLink || dest !== "#" ? [{label: label, to: dest, "class": "font-bold"}, ...airth(cleanedSubDecl)] : airth(cleanedSubDecl)) : undefined
       });
     }
     return ret
@@ -120,6 +130,7 @@ const headersData = await useWikiFetch<API.Response<[
     },
     ...airth(content)
   ];
+
 
 const settingsDialog = ref(false);
 </script>

@@ -12,7 +12,7 @@
         <div class="main-container m-auto">
           <div class="fandom-community-header__background cover fullScreen"
             style="background-attachment: fixed; background-position: center top; background-repeat: no-repeat;"></div>
-          <div class="resizable-container">
+          <div class="resizable-container max-md:!max-w-[unset] max-md:!w-full max-md:mx-0">
             <component :is="pageComponentForNamespace(getPageNamespace(page))" :site="site"
               :page="pageWithParams"></component>
             <div id="recursion" class="min-h-12 w-full bg-elevated flex flex-col !space-y-2 rounded-md !p-4"

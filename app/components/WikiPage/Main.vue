@@ -84,7 +84,7 @@ const imports = (await useWikiFetch<API.Response<[
 
 const route = useRoute();
 const files = imports.map((file)=>file.startsWith("dev:") ? `u:dev:MediaWiki:${file.substring(file.indexOf(':')+1)}` : `MediaWiki:${file}`).join("|");
-const importsUrl = `/api/wikiassets/${route.params.site}/style?modules=${files}`
+const importsUrl = `/api/wikiassets/${route.params.site}/js?modules=${files}`
 
 const page = [pageWithParams.page, ...pageWithParams.params].join("/");
 
@@ -167,12 +167,24 @@ const { data: data } = await useWikiFetch<API.Response<[
     sliders.find(".fandom-slider__nav__caption div:first-child").addClass("miraiwiki-slider__caption-cur");
     //includeWDSIcons = true;
   }
-  const slideshowCount = $("div.wikia-slideshow").length;
-  if (sliders.length != 0 || $("div.wikia-gallery").length != 0 || slideshowCount != 0) {
-    extraSheets.push('ext.fandom.photoGallery.gallery.css')
+  // adding stylesheets on demand
+
+  // slideshow & gallery
+  {
+    const slideshowCount = $("div.wikia-slideshow").length;
+    if (sliders.length != 0 || $("div.wikia-gallery").length != 0 || slideshowCount != 0) {
+      extraSheets.push('ext.fandom.photoGallery.gallery.css')
+    }
+    if (slideshowCount != 0) {
+      extraSheets.push('ext.fandom.photoGallery.slideshow.css')
+    }
   }
-  if (slideshowCount != 0) {
-    extraSheets.push('ext.fandom.photoGallery.slideshow.css')
+
+  // balancedtabber
+  {
+    if ($("ul.tabs__caption").length) {
+      extraSheets.push("u:dev:MediaWiki:BalancedTabber.css")
+    }
   }
   if (extraSheets.length != 0) {
     const { addSheet } = useSheets();
@@ -188,6 +200,8 @@ onMounted(() => {
   //customElements.define("miraiwiki-audio", defineCustomElement(FAudio))
   console.warn("Heads up! We'll be adding some more hydrations to the page!");
   const amogus = useRouter();
+  
+  // pretend that jquery exists
 
   const contentNode = content.value!;
 
@@ -228,7 +242,24 @@ onMounted(() => {
         tabButton.classList.toggle("wds-is-current", i === idx);
       });
     });
-  }))
+  }));
+
+  // balancedtabber
+  contentNode.querySelectorAll("ul.tabs__caption").forEach(tabber => {
+    const tabs = tabber.querySelectorAll("li");
+    tabs.forEach((tab, idx) => {
+      tab.addEventListener("click", (e) => {
+        // Set tab button as current
+        tabs.forEach((t, i) => {
+          t.classList.toggle("active", i === idx);
+        });
+        // Set tab content as current
+        tabber.parentElement?.querySelectorAll("div.tabs__content").forEach((content, i) => {
+          content.classList.toggle("active", i === idx);
+        });
+      });
+    });
+  });
 
   // idk
   contentNode.querySelectorAll("audio.mw-file-element").forEach((v)=>{
