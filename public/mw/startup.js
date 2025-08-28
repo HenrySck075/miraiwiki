@@ -741,7 +741,7 @@ if ( !isCompatible() ) {
 			}
 
 			// Stage 2: Execute 'loaded' modules with no unsatisfied dependencies
-			for ( module in registry ) {
+			for ( module of registry.keys() ) {
 				if ( registry.get( module ).state === 'loaded' && allWithImplicitReady( module ) ) {
 					// Recursively execute all dependent modules that were already loaded
 					// (waiting for execution) and no longer have unsatisfied dependencies.

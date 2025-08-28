@@ -131,6 +131,6 @@ const headersData = await useWikiFetch<API.Response<[
     ...airth(content)
   ];
 
-
+  
 const settingsDialog = ref(false);
 </script>

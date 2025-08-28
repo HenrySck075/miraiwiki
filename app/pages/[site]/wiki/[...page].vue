@@ -121,6 +121,8 @@ if (site.includes(".")) {
 // save the last visited wiki; see /wiki/[...page].vue for details (i think you can figure out why)
 useCookie("lastVisitedWiki").value = site;
 
+const t = useRequestURL();
+
 const indieVersion: ({
   id: string;
   origins_label: string;
@@ -140,7 +142,7 @@ const indieVersion: ({
   destination_host: string;
   tags: Array<string>;
 }) | null = import.meta.dev || useCookie("bypassNro", { "default": () => false, watch: "shallow" }).value 
-? null : (await useFetch("http://localhost:3000/indies_en.json").then(data => {
+? null : (await useFetch(`${t.protocol}//${t.host}/indies_en.json`).then(data => {
   const indies = data.data.value! as any[];
   for (const i of indies) {
     for (const originInfo of i.origins) {

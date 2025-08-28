@@ -20,13 +20,18 @@
     }
     const res = await $fetch<{ parse: { wikitext: string } }>(
         `/api/${site}/parse`,
-        { query: {
-            page: 'MediaWiki:Mainpage',
-            prop: 'wikitext'
-        } }
+        { 
+            query: {
+                page: 'MediaWiki:Mainpage',
+                prop: 'wikitext'
+            },
+            responseType: "json"
+        },    
     )
 
-    const mainpage = res.parse.wikitext.trim()
+    console.log(res);
+
+    const mainpage = res.parse.wikitext.trim().replaceAll(" ", "_")
 
     // Redirect to the mainpage
     navigateTo(`/${site}/wiki/${mainpage}`)
