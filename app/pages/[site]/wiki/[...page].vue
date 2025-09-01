@@ -209,16 +209,16 @@ useHead({
       href: 'https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License'
     },
   ],
-  /// TODO: no mediawiki engine object we need to do this ourselves
-  /*
   script: ()=>{
-    return includeWDSIcons ? [
+    return getPageNamespace(page) === "Main" ? [
       {
-        src: `/api/wikiassets/${site}/style?variant=${currentTheme.value.toLowerCase()}&modules=u:dev:MediaWiki:WDSIcons/code.js`
+        src: "/mw/startup.js"
+      },
+      {
+        src: "/mw/bootstrap.js"
       }
     ] : []
   }
-  */
 })
 
 useSeoMeta({

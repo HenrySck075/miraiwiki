@@ -43,6 +43,11 @@ const isMobile = computed(()=>crack.isLessOrEquals("tablet")) /*(typeof useCooki
 
 const mobileNavOpen = ref(false);
 
+// force mobileNavOpen to false if isMobile is false
+watch(isMobile, (newVal)=>{
+  if (!newVal) mobileNavOpen.value = false;
+});
+
 type mope = {
     label: string,
     to: string,

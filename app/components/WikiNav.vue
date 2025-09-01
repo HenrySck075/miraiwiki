@@ -18,8 +18,10 @@
               <!--<UButton color="neutral" variant="ghost" :to="stackItem.to" class="font-bold">{{ stackItem.label }}</UButton>-->
             </template>
             <!--because in practice the headers list is configured so that the item is copied to its children list (if any) on the very first entry-->
+            <!--update: thats a lie its only there if the header has a link-->
+            <UButton color="neutral" variant="ghost" v-if="stackItem.children[0]?.label !== stackItem.label" class="font-bold hover:bg-default/0">{{ stackItem.label }}</UButton>
             <template v-for="(entry, idx) in stackItem.children">
-              <UButton :class="idx === 0 && stackItem.to ? 'font-bold' : 'font-normal'" color="neutral" variant="ghost" :to="entry.children ? undefined : entry.to" @click="()=>{entry.children ? navigate(entry) : undefined}">
+              <UButton :class="[entry.label === stackItem.label && idx === 0 && stackItem.to ? 'font-bold' : 'font-normal', 'hover:bg-default/70']" color="neutral" variant="ghost" :to="entry.children ? undefined : entry.to" @click="()=>{entry.children ? navigate(entry) : undefined}">
                 {{ entry.label }}
                 <template #trailing v-if="entry.children">
                   <div class="flex-1"></div>

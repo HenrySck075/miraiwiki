@@ -2,7 +2,6 @@
   <WikiPageBase>
     <!--cascading slots-->
     <template #top>
-      <component is="script" src="/mw/startup.js"></component>
       <!--
       <component is="script" :src="`/api/wikiassets/${site}/js?lang=en&modules=jquery|mediawiki.base|ext.fandom.ContentReview.legacyLoaders.js&skin=fandomdesktop&version=erl10`"></component>
       -->

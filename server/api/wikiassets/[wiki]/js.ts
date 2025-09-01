@@ -8,7 +8,8 @@ export default defineEventHandler(async (e)=>{
     e.node.res.setHeaders(new Map(resp.headers.entries().filter(
         (v)=>!v[0].toLowerCase().startsWith("x-") && !["access-control-allow-origin", 'access-control-allow-credentials', 'content-encoding', 'content-length', 'set-cookie'].includes(v[0].toLowerCase())
     )));
-    e.node.res.setHeader("sourcemap", e.node.req.url+"&sourcemap=1")
+    if (e.node.res.getHeader("sourcemap")) 
+        e.node.res.setHeader("sourcemap", e.node.req.url+"&sourcemap=1")
     e.node.res.statusCode = resp.status;
     return resp._data;
 }/*, {
