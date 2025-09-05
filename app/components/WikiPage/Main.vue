@@ -5,6 +5,7 @@
       <!--
       <component is="script" :src="`/api/wikiassets/${site}/js?lang=en&modules=jquery|mediawiki.base|ext.fandom.ContentReview.legacyLoaders.js&skin=fandomdesktop&version=erl10`"></component>
       -->
+      <component is="script" :src="`/api/wikiassets/${site}/js?modules=MediaWiki:Common.js&skin=fandomdesktop`"></component>
       <component is="script" :src="importsUrl"></component>
       <slot name="top"></slot>
     </template>
@@ -155,7 +156,8 @@ const { data: data } = await useWikiFetch<API.Response<[
       await navigateTo(`/${site}/wiki/${data.value.parse.redirects[0].to.replaceAll(" ", "_")}`);
     }
   }
-  // update the image srcs
+
+  // do some serverside html mods
   const $ = cheerio.load(data.value.parse.text);
   const doc = $("body > div").find("img, a, span, audio");
   $('<button type="button" class="mw-collapsible-toggle mw-collapsible-toggle-default" aria-expanded="false" onclick="this.ariaExpanded = this.ariaExpanded === \'true\' ? \'false\' : \'true\'" tabindex="0"><span class="mw-collapsible-text"></span></button>')

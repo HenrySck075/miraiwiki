@@ -7,7 +7,7 @@ function removePrefix(str, prefix) {
 (function(){
     // This code assumes that it's loaded after the mw object is available
 
-    const basedModules = ["jquery", "mediawiki.base"]
+    const basedModules = ["ext.fandom.ContentReview.legacyLoaders.js"]
 
     const site = removePrefix(window.location.pathname, '/').split('/')[0];
     if (!site) {
@@ -24,7 +24,7 @@ function removePrefix(str, prefix) {
     const versionGroups = new Map();
 
     basedModules.forEach(module => {
-        const version = mw?.loader?.moduleRegistry.get(module)?.version;
+        const version = mw?.loader?.moduleRegistry[module]?.version;
         if (!version) {
             console.warn(`Version not found for module: ${module}. Either that or the mw object somehow still doesn't exist.`);
             return;
@@ -36,7 +36,7 @@ function removePrefix(str, prefix) {
     });
 
     versionGroups.entries().forEach(([version, modules]) => {
-        const modulesParam = modules.join('|');
+        const modulesParam = modules.join(',');
         const url = `/api/wikiassets/${site}/js?modules=${encodeURIComponent(modulesParam)}&site=fandomdesktop&version=${encodeURIComponent(version)}`;
         // look "exposed for internal use only" were never a good thing just hide it behind something
         // this is what happens when you did exactly that.

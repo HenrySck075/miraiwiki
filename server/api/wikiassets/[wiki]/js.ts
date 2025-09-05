@@ -1,7 +1,10 @@
 // proxies calls to https://${site}.fandom.com/load.php
 export default defineEventHandler(async (e)=>{
     const resp = await $fetch.raw(`https://${getRouterParam(e, "wiki")}.fandom.com/load.php`, {
-        query: getQuery(e),
+        query: {
+            "skin": "fandomdesktop",
+            ...getQuery(e)
+        },
         headers: e.node.req.headers as Record<string, string>
     });
     // copies headers over
@@ -9,7 +12,8 @@ export default defineEventHandler(async (e)=>{
         (v)=>!v[0].toLowerCase().startsWith("x-") && !["access-control-allow-origin", 'access-control-allow-credentials', 'content-encoding', 'content-length', 'set-cookie'].includes(v[0].toLowerCase())
     )));
     if (e.node.res.getHeader("sourcemap")) 
-        e.node.res.setHeader("sourcemap", e.node.req.url+"&sourcemap=1")
+        e.node.res.removeHeader("sourcemap")
+        //e.node.res.setHeader("sourcemap", e.node.req.url+"&sourcemap=1")
     e.node.res.statusCode = resp.status;
     return resp._data;
 }/*, {

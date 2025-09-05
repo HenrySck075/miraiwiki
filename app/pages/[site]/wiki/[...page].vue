@@ -23,10 +23,10 @@
                     {{ comments.totalCount }} comments
                   </span>
                   <div class="flex-1"></div>
-                  <UButton color="neutral" @click="commentToggled = !commentToggled">{{ commentToggled ? 'Hide' :
+                  <UButton color="neutral" @click="commentsVisible = !commentsVisible">{{ commentsVisible ? 'Hide' :
                     'Show' }}</UButton>
                 </div>
-                <div :style="commentToggled ? '' : 'display: none'">
+                <div :style="commentsVisible ? '' : 'display: none'">
                   <template v-for="cmt in comments.threads">
                     <Comment :data="cmt"></Comment>
                   </template>
@@ -118,7 +118,7 @@ const site = route.params.site as string;
 if (site.includes(".")) {
   throw "amogus";
 }
-// save the last visited wiki; see /wiki/[...page].vue for details (i think you can figure out why)
+// save the last visited wiki; see ~/pages/(doomfes)/__thebetter404.vue for details (i think you can figure out why)
 useCookie("lastVisitedWiki").value = site;
 
 const t = useRequestURL();
@@ -163,13 +163,14 @@ const displayTitle = getPageNamespace(page) !== "Special" ? cheerio.load((await 
   }
 )).data.value.parse.displaytitle, null, false)("*").text() : "";
 const url = useRequestURL().toString();
-const { data: balls } = await useWikiFetch<API.Response<[
+const metadataContext = await useWikiFetch<API.Response<[
   Query.Query<[
     Query.Pages.Pages<[
       Query.Pages.prop.ArticleSnippet, Query.Pages.prop.PageImages<[
         Query.Pages.prop.PageImages_thumbnail
       ]>
-    ]>
+    ]>,
+    Query.meta.SiteInfo.general
   ]>
 ]>>(
   "/query",
@@ -177,13 +178,15 @@ const { data: balls } = await useWikiFetch<API.Response<[
     query: {
       "prop": "articlesnippet|pageimages",
       "piprop": "thumbnail",
-      "titles": page
+      "meta": "siteinfo",
+      "titles": page,
+      "fields": "query(pages,general(mainpage,sitename))" // note for learners: this is a MiraiWiki-specific parameter, google google api fields parameter for more info
     }
   }
-)
-const { data: meta } = await useWikiFetch<any>('/meta')
+).then(v=>v.data.value);
+const sitemeta = metadataContext.query.general;
 useWikiMeta({
-  site: meta.value.sitename,
+  site: sitemeta.sitename,
   page: page
 });
 
@@ -222,20 +225,20 @@ useHead({
 })
 
 useSeoMeta({
-  title: `${displayTitle} | ${meta.value.sitename} | MiraiWiki`,
-  description: balls.value.query.pages[0]!.extract,
+  title: `${displayTitle} | ${sitemeta.sitename} | MiraiWiki`,
+  description: metadataContext.query.pages[0]!.extract,
   robots: {
     maxImagePreview: "standard",
   },
   twitterCard: "summary",
-  twitterDescription: balls.value.query.pages[0]!.extract,
-  twitterTitle: `${displayTitle} | ${meta.value.sitename} | MiraiWiki`,
-  ogSiteName: meta.value.sitename,
+  twitterDescription: metadataContext.query.pages[0]!.extract,
+  twitterTitle: `${displayTitle} | ${sitemeta.sitename} | MiraiWiki`,
+  ogSiteName: sitemeta.sitename,
   ogType: "article",
   ogTitle: displayTitle,
   ogUrl: url,
-  ogDescription: balls.value.query.pages[0]!.extract,
-  ogImage: balls.value.query.pages[0]?.thumbnail?.source,
+  ogDescription: metadataContext.query.pages[0]!.extract,
+  ogImage: metadataContext.query.pages[0]?.thumbnail?.source,
   formatDetection: "telephone=no",
   generator: "MediaWiki 1.43.1", // not exactly i think
 })
@@ -264,7 +267,7 @@ type beef = ({
 });
 let comments: Ref<beef | null>;
 let redirectUrl: string;
-let commentToggled = ref(false);
+let commentsVisible = ref(true);
 if (!indieVersion) {
   themeVarsSheet = useTemplateRef("themeVarsSheet");
   watch(currentTheme, () => {

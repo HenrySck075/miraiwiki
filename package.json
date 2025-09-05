@@ -32,6 +32,8 @@
     "@types/css": "^0.0.38",
     "@types/js-beautify": "^1.14.3",
     "@types/user-agents": "^1.0.4",
+    "regex": "^6.0.1",
+    "regex-recursion": "^6.0.2",
     "ua-parser-js": "^2.0.4"
   }
 }

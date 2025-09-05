@@ -9,12 +9,12 @@
 
     <h2 class="mt-4">MiraiWiki makes wiki pages on Fandom readable</h2>
     It removes ads, videos, and suggested content, leaving you with a clean page that doesn't slow down your device or use up your data, hopefully. <br>
-    To use MiraiWiki, as of now (dev build) there's a little bit of work to set up compared to BreezeWiki:
+    To use MiraiWiki, as of now (dev build) there's a little bit of work to set up:
     <ul class="!list-disc ml-4">
       <li>Download the source code <ULink to="https://github.com/HenrySck075/miraiwiki">here</ULink></li>
       <li>Install the dependencies using any of Node.js' package managers</li>
       <li>Run the server. It will be available on localhost:3000 on the default configuration.</li>
-      <li>To switch to MiraiWiki from a wiki, insert "localhost:3000" before the wiki domain (the "${wiki}.fandom.com" part)</li>
+      <li>To switch to MiraiWiki from a wiki, insert "localhost:3000/" before the wiki domain (the "${wiki}.fandom.com" part)</li>
     </ul>
 
     <h2 class="mt-4">Find a page</h2>

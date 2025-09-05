@@ -404,6 +404,94 @@ export namespace Query {
     export namespace SiteInfo {
       /// ???????????????????
       export type namespace = ({ namespaces: Record<string, objs.Namespace> });
+      export interface GeneralGalleryOptions {
+        imagesPerRow: number;
+        imageWidth: number;
+        imageHeight: number;
+        captionLength: boolean;
+        showBytes: boolean;
+        showDimensions: boolean;
+        mode: string;
+      }
+
+      export interface GeneralImageLimit {
+        width: number;
+        height: number;
+      }
+
+      export interface GeneralMagicLinks {
+        ISBN: boolean;
+        PMID: boolean;
+        RFC: boolean;
+      }
+
+      export interface General {
+        mainpage: string;
+        base: string;
+        sitename: string;
+        mainpageisdomainroot: boolean;
+        logo: string;
+        generator: string;
+        phpversion: string;
+        phpsapi: string;
+        dbtype: string;
+        dbversion: string;
+        imagewhitelistenabled: boolean;
+        externalimages: string[];
+        langconversion: boolean;
+        linkconversion: boolean;
+        titleconversion: boolean;
+        linkprefixcharset: string;
+        linkprefix: string;
+        linktrail: string;
+        legaltitlechars: string;
+        invalidusernamechars: string;
+        allunicodefixes: boolean;
+        fixarabicunicode: boolean;
+        fixmalayalamunicode: boolean;
+        case: string;
+        lang: string;
+        fallback: any[];
+        rtl: boolean;
+        fallback8bitEncoding: string;
+        readonly: boolean;
+        writeapi: boolean;
+        maxarticlesize: number;
+        timezone: string;
+        timeoffset: number;
+        articlepath: string;
+        scriptpath: string;
+        script: string;
+        variantarticlepath: boolean;
+        server: string;
+        servername: string;
+        wikiid: string;
+        time: string;
+        misermode: boolean;
+        uploadsenabled: boolean;
+        maxuploadsize: number;
+        minuploadchunksize: number;
+        galleryoptions: GeneralGalleryOptions;
+        thumblimits: Record<string, number>;
+        imagelimits: Record<string, GeneralImageLimit>;
+        favicon: string;
+        centralidlookupprovider: string;
+        allcentralidlookupproviders: string[];
+        interwikimagic: boolean;
+        magiclinks: GeneralMagicLinks;
+        categorycollation: string;
+        nofollowlinks: boolean;
+        nofollownsexceptions: any[];
+        nofollowdomainexceptions: string[];
+        externallinktarget: string;
+        citeresponsivereferences: boolean;
+        anonwallpost: string;
+        directedatchildren: boolean;
+        gamepedia: string;
+        mobileserver: string;
+      }
+
+      export type general = ({ general: General });
     };
   }
 
