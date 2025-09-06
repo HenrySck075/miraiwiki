@@ -1,5 +1,7 @@
 <template>
   <UApp>
+    <!--because nuxt wipes the eentire head content away-->
+    <div id="mw-scripts"></div>
     <NuxtLoadingIndicator />
     <NuxtLayout>
       <NuxtPage />

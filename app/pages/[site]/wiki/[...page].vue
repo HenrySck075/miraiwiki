@@ -215,17 +215,19 @@ useHead({
   script: ()=>{
     return getPageNamespace(page) === "Main" ? [
       {
-        src: "/mw/startup.js"
+        src: "/mw/startup.js",
+        defer: true
       },
       {
-        src: "/mw/bootstrap.js"
+        src: "/mw/bootstrap.js",
+        defer: true
       }
     ] : []
   }
 })
-
+const mtitle = `${page !== sitemeta.mainpage.replaceAll(' ', '_') ? `${displayTitle} | ` : ''}${sitemeta.sitename} | MiraiWiki`
 useSeoMeta({
-  title: `${displayTitle} | ${sitemeta.sitename} | MiraiWiki`,
+  title: mtitle,
   description: metadataContext.query.pages[0]!.extract,
   robots: {
     maxImagePreview: "standard",

@@ -5,8 +5,8 @@
       <!--
       <component is="script" :src="`/api/wikiassets/${site}/js?lang=en&modules=jquery|mediawiki.base|ext.fandom.ContentReview.legacyLoaders.js&skin=fandomdesktop&version=erl10`"></component>
       -->
-      <component is="script" :src="`/api/wikiassets/${site}/js?modules=MediaWiki:Common.js&skin=fandomdesktop`"></component>
-      <component is="script" :src="importsUrl"></component>
+      <component is="script" defer :src="`/api/wikiassets/${site}/js?modules=MediaWiki:Common.js&skin=fandomdesktop`"></component>
+      <!--<component is="script" defer :src="importsUrl"></component>-->
       <slot name="top"></slot>
     </template>
     <template #headers>
@@ -87,6 +87,11 @@ const imports = (await useWikiFetch<API.Response<[
 const route = useRoute();
 const files = imports.map((file)=>file.startsWith("dev:") ? `u:dev:MediaWiki:${file.substring(file.indexOf(':')+1)}` : `MediaWiki:${file}`).join("|");
 const importsUrl = `/api/wikiassets/${route.params.site}/js?modules=${files}`
+
+if (import.meta.client) {
+  // @ts-ignore
+  mw.loader.using("ext.fandom.ContentReview.legacyLoaders.js", ()=>mw.loader.addScriptTag(importsUrl));
+}
 
 const page = [pageWithParams.page, ...pageWithParams.params].join("/");
 
@@ -197,6 +202,8 @@ const { data: data } = await useWikiFetch<API.Response<[
   //
   return { data: data };
 })
+
+// get the siteinfo's externalimages which contains all imaage hosts
 
 const content = useTemplateRef("content");
 onMounted(() => {

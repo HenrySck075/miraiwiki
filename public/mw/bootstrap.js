@@ -6,14 +6,38 @@ function removePrefix(str, prefix) {
 
 (function(){
     // This code assumes that it's loaded after the mw object is available
-
-    const basedModules = ["ext.fandom.ContentReview.legacyLoaders.js"]
-
     const site = removePrefix(window.location.pathname, '/').split('/')[0];
+
     if (!site) {
         console.error("are you fucking serious right now?");
         return;
     }
+
+    // mediawiki.base mods
+    const conf = mw.loader.moduleRegistry['mediawiki.base'].script.files['config.json'];
+    conf.wgArticlePath = `/${site}/wiki/$1`;
+    // {current server url}/site
+    conf.wgServer = `${window.location.protocol}//${window.location.host}/${site}`;
+    conf.wgServerName = window.location.host;
+
+    // load fandomRequire.js and wait then load the other one
+
+    function buildScriptURL(module) {
+        const version = mw?.loader?.moduleRegistry[module]?.version;
+        if (!version) {
+            console.warn(`Version not found for module: ${module}. Either that or the mw object somehow still doesn't exist.`);
+        }
+        return `/api/wikiassets/${site}/js?modules=${module}&site=fandomdesktop${version ? `&version=version` : ''}`;
+    }
+
+    mw.loader.addScriptTag(buildScriptURL('fandomRequire.js'));
+    mw.loader.using("fandomRequire.js", () => {
+        mw.loader.addScriptTag(buildScriptURL('ext.fandom.ContentReview.legacyLoaders.js'));
+    })
+
+    /*
+    const basedModules = ["fandomRequire.js", "ext.fandom.ContentReview.legacyLoaders.js"]
+
 
     // for each modules, look up its version from the registry
     // and load the script from constructing this url:
@@ -42,4 +66,6 @@ function removePrefix(str, prefix) {
         // this is what happens when you did exactly that.
         mw.loader.addScriptTag(url)
     });
+    */
+
 })()

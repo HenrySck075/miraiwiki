@@ -7,7 +7,7 @@
         </div>
         <div class="flex-1">
             <p><slot></slot></p>
-            <p>Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported) unless stated otherwise, <ULink to="https://fandom.com/licensing">see license info</ULink>. Media files and official Fandom documents mmay have different copying restrictions.</p>
+            <p>Text content on wikis run by Fandom is available under the Creative Commons Attribution-Share Alike License 3.0 (Unported) unless stated otherwise, <ULink to="https://fandom.com/licensing">see license info</ULink>. Media files and official Fandom documents may have different copying restrictions.</p>
             <p>Fandom is a trademark of Fandom, Inc. This project is not affiliated with Fandom. (poof)</p>
         </div>
     </div>
